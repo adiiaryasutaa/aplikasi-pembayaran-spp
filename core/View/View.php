@@ -110,9 +110,8 @@ class View
 		require_once(Application::getViewBasePath() . "/$this->name.view.php");
 
 		$content = ob_get_clean();
-
+		
 		foreach ($this->nests as $key => $view) {
-
 			$content = str_replace($key, $view->render(), $content);
 		}
 

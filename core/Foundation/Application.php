@@ -2,7 +2,11 @@
 
 namespace Core\Foundation;
 
+use Core\Http\Request;
 use Core\Routing\Router;
+use Core\Database\Connection as Database;
+use Core\Session\Store as Session;
+use Core\Auth\AuthManager as Auth;
 
 class Application
 {
@@ -37,6 +41,30 @@ class Application
 	protected static Router $router;
 
 	/**
+	 * The application database
+	 * @var Database
+	 */
+	protected static Database $database;
+
+	/**
+	 * The application session
+	 * @var Session
+	 */
+	protected static Session $session;
+
+	/**
+	 * The application auth manager
+	 * @var Auth
+	 */
+	protected static Auth $auth;
+
+	/**
+	 * The application request
+	 * @var Request
+	 */
+	protected static Request $request;
+
+	/**
 	 * Application constructor
 	 * @param array $configs
 	 */
@@ -44,9 +72,29 @@ class Application
 	{
 		$this->readConfigs($configs);
 
-		self::$router = new Router();
+		$this->init();
 
 		$this->registerRoutes();
+	}
+
+	/**
+	 * Initialize application components (Router, Database, Session, etc...)
+	 * @return void
+	 */
+	private function init()
+	{
+		self::$router = new Router();
+
+		self::$database = new Database(
+			true,
+			require_once(self::$basePath . '/app/config/database.php')
+		);
+
+		self::$session = new Session();
+
+		self::$auth = new Auth();
+
+		self::$request = new Request();
 	}
 
 	/**
@@ -125,5 +173,41 @@ class Application
 	public static function getRouter()
 	{
 		return self::$router;
+	}
+
+	/**
+	 * Get application database
+	 * @return Database
+	 */
+	public static function getDatabase()
+	{
+		return self::$database;
+	}
+
+	/**
+	 * Get application session
+	 * @return Session
+	 */
+	public static function getSession()
+	{
+		return self::$session;
+	}
+
+	/**
+	 * Get application auth manager
+	 * @return Auth
+	 */
+	public static function getAuth()
+	{
+		return self::$auth;
+	}
+
+	/**
+	 * Get application request
+	 * @return Request
+	 */
+	public static function getRequest()
+	{
+		return self::$request;
 	}
 }

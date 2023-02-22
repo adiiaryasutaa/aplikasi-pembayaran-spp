@@ -28,4 +28,9 @@ class Route
 	{
 		return Application::getRouter()->addRoute('POST', $uri, $action);
 	}
+
+	public static function __callStatic($method, $args)
+	{
+		return Application::getRouter()->{$method}(...$args);
+	}
 }

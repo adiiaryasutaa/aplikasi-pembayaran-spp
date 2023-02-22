@@ -8,6 +8,6 @@ class DashboardController
 {
 	public function index()
 	{
-		return view('home')->useLayout(new Dashboard());
+		return view('dashboard/index')->useLayout(new Dashboard());
 	}
 }

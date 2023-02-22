@@ -62,6 +62,17 @@ class Router
 		return null;
 	}
 
+	public function getRouteByName(string $name)
+	{
+		foreach ($this->routes as $route) {
+			if ($route->getName() === $name) {
+				return $route;
+			}
+		}
+
+		return null;
+	}
+
 	/**
 	 * Resolve route that being requested
 	 * @return Response
