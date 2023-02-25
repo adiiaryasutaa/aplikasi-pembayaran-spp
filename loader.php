@@ -3,26 +3,29 @@
 $dirs = [
 	'core' => [
 		'Database' => [
-			'Extensions' => [
+			'Extension' => [
 				'HasAttributes.php',
 			],
-			'Model.php',
 			'Connection.php',
+			'Model.php',
 		],
 		'Http' => [
 			'Controller.php',
 			'Request.php',
 			'Response.php',
+			'RedirectResponse.php',
 		],
 		'Routing' => [
 			'Route.php',
 			'Router.php',
+			'Redirector.php',
 		],
 		'Session' => [
 			'Store.php',
 		],
 		'Auth' => [
 			'AuthManager.php',
+			'Role.php',
 		],
 		'Support' => [
 			'functions.php',
@@ -44,9 +47,10 @@ $dirs = [
 		'models' => [
 			'Pengguna.php',
 			'Petugas.php',
+			'Siswa.php',
 		],
 		'controllers' => [
-			'LoginController.php',
+			'AuthController.php',
 			'DashboardController.php',
 			'PetugasController.php',
 		],

@@ -67,10 +67,10 @@ class View
 	/**
 	 * Add nested views
 	 * @param array|string $keys
-	 * @param View|null $value
+	 * @param string|View|null $value
 	 * @return View
 	 */
-	public function nest(array|string $keys, ?View $view = null)
+	public function nest(array|string $keys, string|View|null $view = null)
 	{
 		if (is_array($keys)) {
 			foreach ($keys as $key => $view) {
@@ -110,7 +110,7 @@ class View
 		require_once(Application::getViewBasePath() . "/$this->name.view.php");
 
 		$content = ob_get_clean();
-		
+
 		foreach ($this->nests as $key => $view) {
 			$content = str_replace($key, $view->render(), $content);
 		}

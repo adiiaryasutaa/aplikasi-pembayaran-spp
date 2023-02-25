@@ -26,67 +26,77 @@
 		Transaksi
 	</div>
 
-	<li class="nav-item  ">
-		<a class="nav-link" href="index.html">
-			<i class="fas fa-fw fa-money-bill"></i>
-			<span>Transaksi</span></a>
-	</li>
+	<?php if (!auth()->user()->pengguna->isSiswa()): ?>
+		<li class="nav-item  ">
+			<a class="nav-link" href="index.html">
+				<i class="fas fa-fw fa-sink"></i>
+				<span>Pembayaran</span></a>
+		</li>
+	<?php endif; ?>
 
-	<li class="nav-item  ">
-		<a class="nav-link" href="index.html">
-			<i class="fas fa-fw fa-sink"></i>
-			<span>Pembayaran</span></a>
-	</li>
 
-	<li class="nav-item  ">
+	<li class="nav-item">
 		<a class="nav-link" href="index.html">
 			<i class="fas fa-fw fa-history"></i>
 			<span>Riwayat</span></a>
 	</li>
 
-	<li class="nav-item  ">
-		<a class="nav-link" href="index.html">
-			<i class="fas fa-fw fa-file"></i>
-			<span>Laporan</span></a>
-	</li>
+	<?php if (auth()->user()->pengguna->isAdmin()): ?>
+		<li class="nav-item">
+			<a class="nav-link" href="index.html">
+				<i class="fas fa-fw fa-file"></i>
+				<span>Laporan</span></a>
+		</li>
+	<?php endif; ?>
 
-	<!-- Divider -->
-	<hr class="sidebar-divider">
+	<?php if (!auth()->user()->pengguna->isSiswa()): ?>
+		<!-- Divider -->
+		<hr class="sidebar-divider">
 
-	<!-- Heading -->
-	<div class="sidebar-heading">
-		Sekolah
-	</div>
+		<!-- Heading -->
+		<div class="sidebar-heading">
+			Sekolah
+		</div>
 
-	<li class="nav-item  ">
-		<a class="nav-link" href="index.html">
-			<i class="fas fa-fw fa-child"></i>
-			<span>Siswa</span></a>
-	</li>
+	<?php endif; ?>
 
-	<li class="nav-item  ">
-		<a class="nav-link" href="index.html">
-			<i class="fas fa-fw fa-house-user"></i>
-			<span>Kelas</span></a>
-	</li>
+	<?php if (auth()->user()->pengguna->isAdmin()): ?>
+		<li class="nav-item  ">
+			<a class="nav-link" href="index.html">
+				<i class="fas fa-fw fa-child"></i>
+				<span>Siswa</span></a>
+		</li>
+	<?php endif; ?>
 
-	<li class="nav-item  <?= routeIs('petugas') ? 'active' : '' ?>">
-		<a class="nav-link" href="<?= route('petugas') ?>">
-			<i class="fas fa-fw fa-user"></i>
-			<span>Petugas</span></a>
-	</li>
+	<?php if (!auth()->user()->pengguna->isSiswa()): ?>
+		<li class="nav-item">
+			<a class="nav-link" href="index.html">
+				<i class="fas fa-fw fa-house-user"></i>
+				<span>Kelas</span></a>
+		</li>
+	<?php endif; ?>
 
-	<!-- Divider -->
-	<hr class="sidebar-divider">
+	<?php if (auth()->user()->pengguna->isAdmin()): ?>
+		<li class="nav-item  <?= routeIs('petugas') ? 'active' : '' ?>">
+			<a class="nav-link" href="<?= route('petugas') ?>">
+				<i class="fas fa-fw fa-user"></i>
+				<span>Petugas</span></a>
+		</li>
+	<?php endif; ?>
 
-	<!-- Heading -->
-	<div class="sidebar-heading">
-		User
-	</div>
+	<?php if (auth()->user()->pengguna->isAdmin()): ?>
+		<!-- Divider -->
+		<hr class="sidebar-divider">
 
-	<li class="nav-item  ">
-		<a class="nav-link" href="index.html">
-			<i class="fas fa-fw fa-user"></i>
-			<span>Pengguna</span></a>
-	</li>
+		<!-- Heading -->
+		<div class="sidebar-heading">
+			User
+		</div>
+
+		<li class="nav-item  ">
+			<a class="nav-link" href="index.html">
+				<i class="fas fa-fw fa-user"></i>
+				<span>Pengguna</span></a>
+		</li>
+	<?php endif; ?>
 </ul>

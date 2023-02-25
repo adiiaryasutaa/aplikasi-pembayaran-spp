@@ -4,9 +4,10 @@ namespace Core\Foundation;
 
 use Core\Http\Request;
 use Core\Routing\Router;
-use Core\Database\Connection as Database;
+use Core\Database\Connection as DatabaseConnection;
 use Core\Session\Store as Session;
 use Core\Auth\AuthManager as Auth;
+use PDO;
 
 class Application
 {
@@ -42,9 +43,9 @@ class Application
 
 	/**
 	 * The application database
-	 * @var Database
+	 * @var DatabaseConnection
 	 */
-	protected static Database $database;
+	protected static DatabaseConnection $databaseConnection;
 
 	/**
 	 * The application session
@@ -85,15 +86,17 @@ class Application
 	{
 		self::$router = new Router();
 
-		self::$database = new Database(
-			true,
-			require_once(self::$basePath . '/app/config/database.php')
+		$databaseConfig = require_once(self::$basePath . '/app/config/database.php');
+
+		self::$databaseConnection = new DatabaseConnection(
+			new PDO(
+				sprintf('mysql:host=%s;port=%s;dbname=%s', $databaseConfig['host'], $databaseConfig['port'], $databaseConfig['database']),
+				$databaseConfig['user'],
+				$databaseConfig['password'],
+			)
 		);
-
 		self::$session = new Session();
-
 		self::$auth = new Auth();
-
 		self::$request = new Request();
 	}
 
@@ -176,12 +179,12 @@ class Application
 	}
 
 	/**
-	 * Get application database
-	 * @return Database
+	 * Get application database connection
+	 * @return DatabaseConnection
 	 */
-	public static function getDatabase()
+	public static function getDatabaseConnection()
 	{
-		return self::$database;
+		return self::$databaseConnection;
 	}
 
 	/**

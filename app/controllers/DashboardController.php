@@ -3,11 +3,18 @@
 namespace App\Controller;
 
 use App\View\Layout\Dashboard;
+use Core\Http\Controller;
 
-class DashboardController
+class DashboardController extends Controller
 {
 	public function index()
 	{
-		return view('dashboard/index')->useLayout(new Dashboard());
+		if (auth()->guest()) {
+			return redirect('login');
+		}
+
+		return view('dashboard/index')
+			->with('user', auth()->user())
+			->useLayout(new Dashboard());
 	}
 }

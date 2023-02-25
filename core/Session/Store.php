@@ -65,8 +65,32 @@ class Store
 		return isset($this->attributes[$key]);
 	}
 
+	public function setFlash(string|array $keys, $value = null)
+	{
+		if (is_array($keys)) {
+			$keys = array_combine(
+				array_map(fn($key) => "_flash.$key", array_keys($keys)),
+				array_values($value)
+			);
+		} else {
+			$keys = "_flash.$keys";
+		}
+
+		$this->put($keys, $value);
+	}
+
+	public function getFlash(string $key)
+	{
+		return $this->pull("_flash.$key");
+	}
+
+	public function hasFlash(string $key)
+	{
+		return $this->has("_flash.$key");
+	}
+
 	public function __get($name)
 	{
-		return $this->get($name);
+		return $this->get($name) ?? $this->getFlash($name);
 	}
 }

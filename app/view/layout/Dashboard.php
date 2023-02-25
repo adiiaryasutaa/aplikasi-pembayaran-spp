@@ -34,6 +34,7 @@ class Dashboard extends Layout
 		'{$ sidebar $}' => 'partials/sidebar',
 		'{$ topbar $}' => 'partials/topbar',
 		'{$ footer $}' => 'partials/footer',
+		'{$ logout-modal $}' => 'partials/logout-modal',
 		'{$ sttb $}' => 'partials/scroll-to-top-button',
 	];
 }

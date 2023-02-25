@@ -3,6 +3,7 @@
 namespace Core\Routing;
 
 use Closure;
+use Core\Foundation\Application;
 
 class Route
 {
@@ -43,6 +44,15 @@ class Route
 		$this->uri = $uri;
 		$this->action = $action;
 		$this->name = $name;
+	}
+
+	/**
+	 * Get route full uri
+	 * @return string
+	 */
+	public function getFullUri()
+	{
+		return Application::getHost() . $this->uri;
 	}
 
 	/**

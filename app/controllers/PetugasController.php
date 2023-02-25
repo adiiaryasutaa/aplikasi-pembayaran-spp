@@ -10,10 +10,11 @@ class PetugasController extends Controller
 {
 	public function index()
 	{
-		$petugas = new Petugas();
-		$petugas->where(['id' => 1]);
+		if (auth()->guest()) {
+			return redirect('login');
+		}
 
-		return view('petugas/index', ['petugas' => $petugas])
+		return view('petugas/index', ['petugas' => (new Petugas)->all()])
 			->useLayout(new Dashboard());
 	}
 }

@@ -3,89 +3,44 @@
 namespace Core\Database;
 
 use PDO;
-use PDOException;
+use PDOStatement;
 
 class Connection
 {
-	/**
-	 * The active PDO connection
-	 * @var PDO
-	 */
 	protected PDO $pdo;
 
-	/**
-	 * The database host
-	 * @var string
-	 */
-	protected string $host;
-
-	/**
-	 * The database port
-	 * @var string
-	 */
-	protected string $port;
-
-	/**
-	 * The database name
-	 * @var string
-	 */
 	protected string $database;
 
-	/**
-	 * The database user
-	 * @var string
-	 */
-	protected string $user;
+	protected int $pdoFetchMode = PDO::FETCH_ASSOC;
 
-	/**
-	 * The database password
-	 * @var string
-	 */
-	protected string $password;
 
-	/**
-	 * Connection constructor
-	 * @param array $config
-	 */
-	public function __construct(bool $autoConnect = true, array $configs = [])
+	public function __construct(PDO $pdo)
 	{
-		$this->database = $configs['database'];
-		$this->host = $configs['host'];
-		$this->port = $configs['port'];
-		$this->user = $configs['user'];
-		$this->password = $configs['password'];
+		$this->pdo = $pdo;
 
-		if ($autoConnect) {
-			$this->connect();
-		}
+		$this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	}
 
-	/**
-	 * Connect to database
-	 * @return void
-	 */
-	public function connect()
+	public function prepare(string $query, array|null $options = [])
 	{
-		try {
-			$this->pdo = new PDO("mysql:host=$this->host:$this->port;dbname=$this->database", $this->user, $this->password);
+		$statement = $this->pdo->prepare(...func_get_args());
 
-			$this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-		} catch (PDOException $e) {
-			echo $e->getMessage();
-			exit();
-		}
+		$statement->setFetchMode($this->pdoFetchMode);
+
+		return $statement;
 	}
 
-	public function query(string $query, array $params = [], int $fetchMode = PDO::FETCH_ASSOC)
+	public function bindValues(PDOStatement $statement, array $bindings)
 	{
-		$preparedStatement = $this->pdo->prepare($query);
-
-		//foreach ($params as $key => $value) {
-		//	$preparedStatement->bindParam($key, $value);
-		//}
-
-		$preparedStatement->execute($params);
-
-		return $preparedStatement->fetch();
+		foreach ($bindings as $key => $value) {
+			$statement->bindValue(
+				$key,
+				$value,
+				match (true) {
+					is_int($value) => PDO::PARAM_INT,
+					default => PDO::PARAM_STR
+				}
+			);
+		}
 	}
 }

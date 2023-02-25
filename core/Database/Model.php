@@ -2,34 +2,54 @@
 
 namespace Core\Database;
 
-use Core\Database\Connection as Database;
-use Core\Database\Extension\HasAttributes;
+use Core\Extension\Database\HasAttributes;
 use Core\Foundation\Application;
 
 abstract class Model
 {
 	use HasAttributes;
 
-	protected Database $database;
+	protected Connection $connection;
+
+	protected string $table;
+
+	protected string $primaryKey = 'id';
 
 	protected bool $hasBeenQueried = false;
 
-	public function __construct()
+	public function __construct(array $attributes = [])
 	{
-		$this->database = Application::getDatabase();
+		$this->connection = Application::getDatabaseConnection();
+		$this->attributes = $attributes;
 	}
 
 	public function exists()
 	{
-		if ($this->hasBeenQueried) {
-			return false;
-		}
+		return $this->hasBeenQueried && !empty($this->attributes);
+	}
 
-		return !empty($this->attributes);
+	public function getTable()
+	{
+		return $this->table;
+	}
+
+	public function getPrimaryKeyColumnName()
+	{
+		return $this->primaryKey;
+	}
+
+	public static function __callStatic($method, $args)
+	{
+		return (new static )->{$method}(...$args);
 	}
 
 	public function __get($name)
 	{
-		return $this->getAttributes($name);
+		return $this->getAttribute($name);
+	}
+
+	public function __set($name, $value)
+	{
+		return $this->setAttribute($name, $value);
 	}
 }
