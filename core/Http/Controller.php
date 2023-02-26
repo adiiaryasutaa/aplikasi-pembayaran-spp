@@ -16,4 +16,9 @@ abstract class Controller
 
 		return $request->$name;
 	}
+
+	public function saveInputs()
+	{
+		
+	}
 }

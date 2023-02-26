@@ -32,6 +32,17 @@ class Request
 		return (string) ($this->method() == 'GET' ? $_GET[$name] : $_POST[$name]);
 	}
 
+	public function only(array $names)
+	{
+		$inputs = [];
+
+		foreach ($names as $name) {
+			$inputs[] = $this->$name ?? null;
+		}
+
+		return $inputs;
+	}
+
 	/**
 	 * Get string request input
 	 * @param string $name

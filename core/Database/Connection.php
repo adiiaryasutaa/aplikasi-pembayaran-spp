@@ -43,4 +43,9 @@ class Connection
 			);
 		}
 	}
+
+	public function __call($method, $args)
+	{
+		return $this->pdo->{$method}(...$args);
+	}
 }

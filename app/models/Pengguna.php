@@ -73,6 +73,20 @@ class Pengguna extends Model
 		return $this;
 	}
 
+	public function insert(string $username, string $password, Role $role)
+	{
+		$query = "INSERT INTO $this->table (username, password, role) VALUES (:username, :password, :role)";
+
+		$statement = $this->connection->prepare($query);
+
+		$this->connection->bindValues(
+			$statement,
+			array_merge(compact('username', 'password'), ['role' => $role->value])
+		);
+
+		return $statement->execute();
+	}
+
 	public function isAdmin()
 	{
 		return $this->role === Role::ADMIN;

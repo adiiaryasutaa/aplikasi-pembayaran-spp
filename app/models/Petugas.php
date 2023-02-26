@@ -14,9 +14,11 @@ class Petugas extends Model
 	{
 		$penggunaTable = (new Pengguna)->getTable();
 
-		$query = "SELECT * FROM $this->table INNER JOIN $penggunaTable ON $penggunaTable.id = $this->table.pengguna_id";
+		$query = "SELECT * FROM $this->table INNER JOIN $penggunaTable ON $penggunaTable.id = $this->table.pengguna_id WHERE $penggunaTable.role <> :{$penggunaTable}Role";
 
 		$statement = $this->connection->prepare($query);
+
+		$this->connection->bindValues($statement, ["{$penggunaTable}Role" => Role::ADMIN->value]);
 
 		$statement->execute();
 
@@ -29,8 +31,8 @@ class Petugas extends Model
 				'role' => match ($data['role']) {
 					1 => Role::ADMIN,
 					2 => Role::PETUGAS,
-					3 => Role::SISWA,
-				}
+					3 => Role::SISWA
+				},
 			]);
 
 			unset($data['pengguna_id'], $data['username'], $data['username'], $data['role']);
@@ -125,8 +127,8 @@ class Petugas extends Model
 			'role' => match ($result['role']) {
 				1 => Role::ADMIN,
 				2 => Role::PETUGAS,
-				3 => Role::SISWA,
-			}
+				3 => Role::SISWA
+			},
 		]);
 
 		unset($result['pengguna_id'], $result['username'], $result['username'], $result['role']);
@@ -134,5 +136,16 @@ class Petugas extends Model
 		$this->setAttributes(array_merge($result, compact('pengguna')));
 
 		return $this;
+	}
+
+	public function insert(string $nama, int $penggunaId)
+	{
+		$query = "INSERT INTO $this->table (nama, pengguna_id) VALUES (:nama, :penggunaId)";
+
+		$statement = $this->connection->prepare($query);
+
+		$this->connection->bindValues($statement, compact('nama', 'penggunaId'));
+
+		return $statement->execute();
 	}
 }

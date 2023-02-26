@@ -37,6 +37,7 @@ $dirs = [
 		'Foundation' => [
 			'Facade' => [
 				'Auth.php',
+				'DB.php',
 				'Session.php',
 				'Route.php',
 			],

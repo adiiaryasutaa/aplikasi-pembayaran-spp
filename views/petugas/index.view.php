@@ -1,3 +1,15 @@
+<?php if (session()->has('create-petugas-success')): ?>
+	<div class="alert alert-success" role="alert">
+		<?= session('create-petugas-success') ?>
+	</div>
+<?php endif ?>
+
+<?php if (session()->has('create-petugas-failed')): ?>
+	<div class="alert alert-success" role="alert">
+		<?= session('create-petugas-failed') ?>
+	</div>
+<?php endif ?>
+
 <div class="card shadow mb-4">
 	<div class="card-header d-flex justify-content-between align-items-center py-3">
 		<h5 class="m-0 font-weight-bold text-primary">Petugas</h5>
@@ -42,19 +54,23 @@
 					</button>
 				</div>
 				<div class="modal-body">
-					<div class="input-group mb-4">
-						<input type="text" class="form-control bg-light border border-primary small" placeholder="Nama">
+					<div class="form-group mb-4">
+						<label for="name">Nama</label>
+						<input id="name" name="nama" type="text" class="form-control bg-light border border-primary small">
 					</div>
-					<div class="input-group mb-4">
-						<input type="text" class="form-control bg-light border border-primary small" placeholder="Username">
+					<div class="form-group mb-4">
+						<label for="username">Username</label>
+						<input id="username" name="username" type="text" class="form-control bg-light border border-primary small">
 					</div>
-					<div class="input-group">
-						<input type="password" class="form-control bg-light border border-primary small" placeholder="Password">
+					<div class="form-group">
+						<label for="password">Password</label>
+						<input id="password" name="password" type="password"
+							class="form-control bg-light border border-primary small">
 					</div>
 				</div>
 				<div class="modal-footer">
 					<button class="btn btn-secondary" type="reset" data-dismiss="modal">Batal</button>
-					<button type="submit" class="btn btn-primary">Keluar</submit>
+					<button type="submit" class="btn btn-primary">Tambah</submit>
 				</div>
 			</div>
 		</div>
