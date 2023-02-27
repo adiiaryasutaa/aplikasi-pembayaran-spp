@@ -10,6 +10,19 @@ class Pengguna extends Model
 {
 	protected string $table = 'pengguna';
 
+	public function __construct(array $attributes = [])
+	{
+		if (isset($attributes['role']) && !$attributes['role'] instanceof Role) {
+			$attributes['role'] = match ($attributes['role']) {
+				1 => Role::ADMIN,
+				2 => Role::PETUGAS,
+				3 => Role::SISWA
+			};
+		}
+
+		parent::__construct($attributes);
+	}
+
 	public function where(string|array $columns, $value = null)
 	{
 		$query = "SELECT * FROM $this->table WHERE ";

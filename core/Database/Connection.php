@@ -13,7 +13,6 @@ class Connection
 
 	protected int $pdoFetchMode = PDO::FETCH_ASSOC;
 
-
 	public function __construct(PDO $pdo)
 	{
 		$this->pdo = $pdo;
@@ -42,6 +41,37 @@ class Connection
 				}
 			);
 		}
+	}
+
+	public function statement(string $query, array $bindings = [])
+	{
+		$statement = $this->prepare($query);
+
+		$this->bindValues($statement, $bindings);
+
+		return $statement->execute();
+	}
+
+	public function result(string $query, array $bindings = [])
+	{
+		$statement = $this->prepare($query);
+
+		$this->bindValues($statement, $bindings);
+
+		$statement->execute();
+
+		return $statement->fetch();
+	}
+
+	public function resultAll(string $query, array $bindings = [])
+	{
+		$statement = $this->prepare($query);
+
+		$this->bindValues($statement, $bindings);
+
+		$statement->execute();
+
+		return $statement->fetchAll(PDO::FETCH_DEFAULT);
 	}
 
 	public function __call($method, $args)

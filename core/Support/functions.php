@@ -21,6 +21,11 @@ function view(string $name, array $data = [], array $nests = [])
 	return new View($name, $data, $nests);
 }
 
+function request()
+{
+	return Application::getRequest();
+}
+
 /**
  * Get public asset
  * @param mixed $path
@@ -29,6 +34,17 @@ function view(string $name, array $data = [], array $nests = [])
 function asset($path)
 {
 	return Application::getHost() . "/$path";
+}
+
+function route(string $name, array $parameters = [])
+{
+	$route = Route::getRouteByName($name);
+
+	if (!is_null($route)) {
+		return $route->getFullUri($parameters);
+	}
+
+	throw new Exception("Route with name [{$name}] not found");
 }
 
 function routeIs(string $name)
@@ -41,17 +57,6 @@ function routeIs(string $name)
 	}
 
 	return $route->getUri() === $currentRoute;
-}
-
-function route(string $path)
-{
-	$route = Route::getRouteByName($path);
-
-	if (!is_null($route)) {
-		$path = $route->getUri();
-	}
-
-	return Application::getHost() . (!str_starts_with($path, '/') ? '/' : '') . $path;
 }
 
 function redirect(string $to, int $status = 302)
@@ -103,10 +108,20 @@ function session(string $key = null)
 	return $session->$key;
 }
 
+function error(string $key)
+{
+	return session()->getError($key);
+}
+
+function old(string $key, $default = null)
+{
+	return session()->getInput($key) ?? $default;
+}
+
 function dd(...$vars)
 {
 	echo "<pre>";
-	var_dump(...$vars);
+	print_r(...$vars);
 	echo "</pre>";
 	exit();
 }

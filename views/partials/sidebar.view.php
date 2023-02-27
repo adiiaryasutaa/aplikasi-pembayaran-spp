@@ -61,16 +61,16 @@
 	<?php endif; ?>
 
 	<?php if (auth()->user()->pengguna->isAdmin()): ?>
-		<li class="nav-item  ">
-			<a class="nav-link" href="index.html">
+		<li class="nav-item <?= routeIs('siswa') ? 'active' : '' ?>">
+			<a class="nav-link" href="<?= route('siswa') ?>">
 				<i class="fas fa-fw fa-child"></i>
 				<span>Siswa</span></a>
 		</li>
 	<?php endif; ?>
 
 	<?php if (!auth()->user()->pengguna->isSiswa()): ?>
-		<li class="nav-item">
-			<a class="nav-link" href="index.html">
+		<li class="nav-item <?= routeIs('kelas') ? 'active' : '' ?>">
+			<a class="nav-link" href="<?= route('kelas') ?>">
 				<i class="fas fa-fw fa-house-user"></i>
 				<span>Kelas</span></a>
 		</li>

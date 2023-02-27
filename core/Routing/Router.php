@@ -3,6 +3,7 @@
 namespace Core\Routing;
 
 use Closure;
+use Core\Http\Request;
 use Core\Http\Response;
 use Core\Routing\Route;
 
@@ -13,6 +14,13 @@ class Router
 	 * @var array
 	 */
 	protected array $routes = [];
+
+	protected Request $request;
+
+	public function __construct(Request $request)
+	{
+		$this->request = $request;
+	}
 
 	/**
 	 * Add a new route
@@ -53,13 +61,28 @@ class Router
 	 */
 	public function getRoute(string $method, string $uri)
 	{
-		foreach ($this->routes as $route) {
-			if ($route->getMethod() === $method && $route->getUri() === $uri) {
+		$routes = $this->getRouteMap($method);
+
+		foreach ($routes as $route) {
+			if ($route->matches($uri)) {
 				return $route;
 			}
 		}
 
 		return null;
+	}
+
+	public function getRouteMap(string $method)
+	{
+		$routes = [];
+
+		foreach ($this->routes as $route) {
+			if ($route->getMethod() === $method) {
+				$routes[] = $route;
+			}
+		}
+
+		return $routes;
 	}
 
 	public function getRouteByName(string $name)
@@ -79,7 +102,10 @@ class Router
 	 */
 	public function resolve()
 	{
-		$route = $this->getRoute($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
+		$method = $_SERVER['REQUEST_METHOD'];
+		$uri = $_SERVER['REQUEST_URI'];
+
+		$route = $this->getRoute($method, $uri);
 
 		if (is_null($route)) {
 			return new Response("404 | Not Found", 404);
@@ -91,7 +117,7 @@ class Router
 			$action = [new $action[0] /* Controller class */, $action[1] /* Controller method */];
 		}
 
-		$response = call_user_func_array($action, []);
+		$response = call_user_func_array($action, $route->extractArguments($uri));
 
 		// If action doesn't return response that not instance of Response class
 		// Wrap response into Response class

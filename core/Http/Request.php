@@ -2,8 +2,24 @@
 
 namespace Core\Http;
 
+use Core\Session\Store as Session;
+
 class Request
 {
+	protected Session $session;
+
+	public function __construct(Session $session)
+	{
+		$this->session = $session;
+	}
+
+	public function saveInputsToSession()
+	{
+		if ($this->method() === 'POST') {
+			$this->session->putInput($_POST);
+		}
+	}
+
 	/**
 	 * Get current request uri
 	 * @return mixed

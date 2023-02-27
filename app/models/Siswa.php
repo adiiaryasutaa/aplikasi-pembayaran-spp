@@ -10,6 +10,41 @@ class Siswa extends Model
 {
 	protected string $table = 'siswa';
 
+	public function all()
+	{
+		$query = "SELECT %s FROM %s INNER JOIN %s ON %s";
+
+		$query = sprintf(
+			$query,
+			"$this->table.*, kelas.nama AS nama_kelas, kelas.kompetensi_keahlian",
+			$this->table,
+			'kelas',
+			"$this->table.kelas_id = kelas.id",
+		);
+
+		//dd($query);
+
+		$statement = $this->connection->prepare($query);
+
+		$statement->execute();
+
+		$models = [];
+
+		foreach ($statement->fetchAll(PDO::FETCH_DEFAULT) as $data) {
+			$data['kelas'] = new Kelas([
+				'id' => $data['kelas_id'],
+				'nama' => $data['nama_kelas'],
+				'kompetensi_keahlian' => $data['kompetensi_keahlian'],
+			]);
+
+			unset($data['kelas_id']);
+
+			$models[] = new static ($data);
+		}
+
+		return $models;
+	}
+
 	public function where(string|array $columns, $value = null)
 	{
 		$query = "SELECT * FROM $this->table WHERE ";
@@ -103,5 +138,24 @@ class Siswa extends Model
 		$this->setAttributes(array_merge($result, compact('pengguna')));
 
 		return $this;
+	}
+
+	public function insert(array $data)
+	{
+		$columns = array_keys($data);
+		$values = array_values($data);
+		$bindingNames = array_map(fn($column) => ":$column", $columns);
+
+		$query = sprintf(
+			"INSERT INTO %s (%s) VALUES (%s)",
+			$this->table,
+			implode(', ', $columns),
+			implode(', ', $bindingNames),
+		);
+
+		return $this->connection->statement(
+			$query,
+			array_combine($bindingNames, $values)
+		);
 	}
 }

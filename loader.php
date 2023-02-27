@@ -29,6 +29,11 @@ $dirs = [
 		],
 		'Support' => [
 			'functions.php',
+			'Str.php',
+		],
+		'Validation' => [
+			'Rules.php',
+			'Validator.php',
 		],
 		'View' => [
 			'View.php',
@@ -46,6 +51,7 @@ $dirs = [
 	],
 	'app' => [
 		'models' => [
+			'Kelas.php',
 			'Pengguna.php',
 			'Petugas.php',
 			'Siswa.php',
@@ -53,7 +59,9 @@ $dirs = [
 		'controllers' => [
 			'AuthController.php',
 			'DashboardController.php',
+			'KelasController.php',
 			'PetugasController.php',
+			'SiswaController.php',
 		],
 		'view' => [
 			'layout' => [

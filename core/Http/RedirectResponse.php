@@ -52,4 +52,11 @@ class RedirectResponse extends Response
 
 		return $this;
 	}
+
+	public function withError(string|array $keys, $value = null)
+	{
+		Session::putError($keys, $value);
+
+		return $this;
+	}
 }

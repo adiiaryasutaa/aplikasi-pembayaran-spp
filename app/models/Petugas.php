@@ -4,6 +4,9 @@ namespace App\Model;
 
 use Core\Auth\Role;
 use Core\Database\Model;
+use Core\Foundation\Facade\DB;
+use Core\Support\Str;
+use Exception;
 use PDO;
 
 class Petugas extends Model
@@ -104,6 +107,86 @@ class Petugas extends Model
 		return $this;
 	}
 
+	public function joinWithPetugasWhereFirst(string|array $columns, $value = null)
+	{
+		$penggunaTable = (new Pengguna)->getTable();
+
+		$query = "SELECT %s FROM %s INNER JOIN %s ON %s WHERE %s";
+
+		$wheres = [];
+		$bindingNames = [];
+		$value = array_values($columns);
+
+		if (is_array($columns)) {
+			$columns = array_keys($columns);
+
+			foreach ($columns as $column) {
+				$bindingNames[$column] = Str::camelCase($column, '.');
+			}
+		} else {
+			$bindingNames[$columns] = Str::camelCase($columns, '.');
+		}
+
+		foreach ($columns as $i => $column) {
+			$wheres[] = "$column = :{$bindingNames[$column]}";
+		}
+
+		$query = sprintf(
+			$query,
+			'petugas.id AS petugasId, nama, pengguna.id AS penggunaId, username, password, role',
+			$this->table,
+			$penggunaTable,
+			"$penggunaTable.id = $this->table.pengguna_id",
+			implode(' AND ', $wheres),
+		);
+
+		$statement = $this->connection->prepare($query);
+
+		$this->connection->bindValues(
+			$statement,
+			array_combine(array_values($bindingNames), $value),
+		);
+
+		if ($statement->execute()) {
+			$result = $statement->fetch();
+
+			$this->attributes = $result ? [
+				'id' => $result['petugasId'],
+				'nama' => $result['nama'],
+				'pengguna' => new Pengguna([
+					'id' => $result['penggunaId'],
+					'username' => $result['username'],
+					'password' => $result['password'],
+					'role' => $result['role'],
+				]),
+			] : [];
+		}
+
+		$this->hasBeenQueried = true;
+
+		return $this;
+	}
+
+	public function getTotalTransaksi()
+	{
+		$query = sprintf(
+			"SELECT %s FROM %s INNER JOIN %s ON %s WHERE %s",
+			"COUNT(*) AS total_transaksi",
+			$this->table,
+			'transaksi',
+			"$this->table.id = transaksi.petugas_id",
+			"petugas.id = :id"
+		);
+
+		$statement = $this->connection->prepare($query);
+
+		$this->connection->bindValues($statement, ['id' => $this->id]);
+
+		$statement->execute();
+
+		return $statement->fetch()['total_transaksi'];
+	}
+
 	public function getByPenggunaId(int $id)
 	{
 		$pengguna = new Pengguna();
@@ -147,5 +230,77 @@ class Petugas extends Model
 		$this->connection->bindValues($statement, compact('nama', 'penggunaId'));
 
 		return $statement->execute();
+	}
+
+	public function update(array $data = [])
+	{
+		$query = "UPDATE %s INNER JOIN %s ON %s SET %s WHERE %s";
+
+		$values = array_values($data);
+		$columns = array_keys($data);
+
+		$bindingNames = [];
+
+		foreach ($columns as $column) {
+			$bindingNames[$column] = ':' . Str::camelCase($column, '.');
+		}
+
+		$query = sprintf(
+			$query,
+			$this->table,
+			'pengguna',
+			"$this->table.pengguna_id = pengguna.id",
+			implode(', ', array_map(fn($column) => "$column = {$bindingNames[$column]}", $columns)),
+			"$this->table.id = :id"
+		);
+
+		$statement = $this->connection->prepare($query);
+
+		$this->connection->bindValues(
+			$statement,
+			array_merge(array_combine($columns, $values), ['id' => $this->id])
+		);
+
+		return $statement->execute();
+	}
+
+	public function deleteWhere(array $columns = [])
+	{
+		$query = "DELETE %s, %s FROM %s INNER JOIN %s ON %s WHERE %s";
+
+		$values = array_values($columns);
+		$columns = array_keys($columns);
+
+		$query = sprintf(
+			$query,
+			$this->table,
+			'pengguna',
+			$this->table,
+			'pengguna',
+			"$this->table.pengguna_id = pengguna.id",
+			implode(' AND ', array_map(fn($column) => "$column = :$column", $columns)),
+		);
+
+		try {
+			DB::beginTransaction();
+
+			$statement = $this->connection->prepare($query);
+
+			$this->connection->bindValues($statement, array_combine($columns, $values));
+
+			if (!$statement->execute()) {
+				throw new Exception();
+			}
+
+			DB::commit();
+
+			return true;
+		} catch (Exception $ex) {
+			DB::rollback();
+			dd($ex->getMessage());
+
+			return false;
+		}
+
 	}
 }

@@ -84,7 +84,9 @@ class Application
 	 */
 	private function init()
 	{
-		self::$router = new Router();
+		self::$session = new Session();
+		self::$request = new Request(self::$session);
+		self::$router = new Router(self::$request);
 
 		$databaseConfig = require_once(self::$basePath . '/app/config/database.php');
 
@@ -95,9 +97,7 @@ class Application
 				$databaseConfig['password'],
 			)
 		);
-		self::$session = new Session();
 		self::$auth = new Auth();
-		self::$request = new Request();
 	}
 
 	/**
@@ -119,6 +119,8 @@ class Application
 	 */
 	public function start()
 	{
+		self::$request->saveInputsToSession();
+
 		$response = self::$router->resolve();
 
 		$response->send();
