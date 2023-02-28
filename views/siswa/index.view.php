@@ -109,11 +109,9 @@
 										<label for="kelas">Kelas</label>
 										<select class="form-control bg-light border border-primary small" id="kelas" name="kelas">
 											<option>Belum dipilih</option>
-											<option>1</option>
-											<option>2</option>
-											<option>3</option>
-											<option>4</option>
-											<option>5</option>
+											<?php foreach ($kelas as $k): ?>
+												<option value="<?= $k->id ?>"><?= $k->nama ?></option>
+											<?php endforeach; ?>
 										</select>
 									</div>
 								</div>

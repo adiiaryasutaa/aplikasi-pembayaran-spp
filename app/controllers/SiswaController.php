@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Model\Kelas;
 use App\Model\Pengguna;
 use App\Model\Siswa;
 use App\View\Layout\Dashboard;
@@ -17,9 +18,10 @@ class SiswaController extends Controller
 	public function index()
 	{
 		$siswa = (new Siswa)->all();
+		$kelas = (new Kelas)->all();
 
 		return view('siswa/index')
-			->with(compact('siswa'))
+			->with(compact('siswa', 'kelas'))
 			->useLayout(new Dashboard);
 	}
 
@@ -83,9 +85,13 @@ class SiswaController extends Controller
 		}
 	}
 
-	public function show()
+	public function show(int $id)
 	{
-		# code...
+		$siswa = (new Siswa)->getDetailWhereFirst(['siswa.id' => $id]);
+
+		return view('siswa/detail')
+			->with(compact('siswa'))
+			->useLayout(new Dashboard);
 	}
 
 	public function update()

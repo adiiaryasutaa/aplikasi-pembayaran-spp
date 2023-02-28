@@ -52,6 +52,7 @@ $dirs = [
 	'app' => [
 		'models' => [
 			'Kelas.php',
+			'Pembayaran.php',
 			'Pengguna.php',
 			'Petugas.php',
 			'Siswa.php',

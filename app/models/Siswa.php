@@ -4,6 +4,7 @@ namespace App\Model;
 
 use Core\Auth\Role;
 use Core\Database\Model;
+use Core\Support\Str;
 use PDO;
 
 class Siswa extends Model
@@ -102,6 +103,59 @@ class Siswa extends Model
 		$this->hasBeenQueried = true;
 
 		$this->attributes = $statement->fetch();
+
+		return $this;
+	}
+
+	public function getDetailWhereFirst(array $columns)
+	{
+		$values = array_values($columns);
+		$columns = array_keys($columns);
+		$bindingNames = array_combine(
+			$columns,
+			array_map(fn($column) => ':' . Str::camelCase($column, '.'), $columns)
+		);
+
+		$query = sprintf(
+			"SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s INNER JOIN %s ON %s WHERE %s",
+			'siswa.*, kelas.nama AS nama_kelas, kelas.kompetensi_keahlian, pengguna.username, pengguna.password, pengguna.role, pembayaran.tahun_ajaran, pembayaran.nominal',
+			'siswa',
+			'kelas',
+			'siswa.kelas_id = kelas.id',
+			'pengguna',
+			'siswa.pengguna_id = pengguna.id',
+			'pembayaran',
+			'siswa.pembayaran_id = pembayaran.id',
+			implode(array_map(fn($column) => "$column = {$bindingNames[$column]}", $columns))
+		);
+
+		$data = $this->connection->result($query, array_combine($bindingNames, $values));
+		$this->hasBeenQueried = true;
+
+		$this->attributes = [
+			'id' => $data['id'],
+			'nisn' => $data['nisn'],
+			'nis' => $data['nis'],
+			'nama' => $data['nama'],
+			'alamat' => $data['alamat'],
+			'telepon' => $data['telepon'],
+			'kelas' => new Kelas([
+				'id' => $data['kelas_id'],
+				'nama' => $data['nama_kelas'],
+				'kompetensi_keahlian' => $data['kompetensi_keahlian'],
+			]),
+			'pengguna' => new Pengguna([
+				'id' => $data['pengguna_id'],
+				'username' => $data['username'],
+				'password' => $data['password'],
+				'role' => $data['role'],
+			]),
+			'pembayaran' => new Pembayaran([
+				'id' => $data['pembayaran_id'],
+				'tahun_ajaran' => $data['tahun_ajaran'],
+				'nominal' => $data['nominal'],
+			]),
+		];
 
 		return $this;
 	}
