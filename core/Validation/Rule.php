@@ -4,7 +4,7 @@ namespace Core\Validation;
 
 use Core\Foundation\Facade\DB;
 
-class Rules
+class Rule
 {
 	public static function required()
 	{
@@ -70,6 +70,21 @@ class Rules
 			'name' => 'exists',
 			'error' => "Data ini belum terdaftar",
 			'action' => !static::unique($table, $column)
+		];
+	}
+
+	public static function year()
+	{
+		return [
+			'name' => 'year',
+			'error' => "%s harus berupa tahun yang valid",
+			'action' => function ($data) {
+				if (!is_numeric($data)) {
+					return false;
+				}
+
+				return $data >= 1 && $data <= 2100;
+			}
 		];
 	}
 }

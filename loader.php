@@ -8,6 +8,7 @@ $dirs = [
 			],
 			'Connection.php',
 			'Model.php',
+			'QueryHelper.php',
 		],
 		'Http' => [
 			'Controller.php',
@@ -32,7 +33,7 @@ $dirs = [
 			'Str.php',
 		],
 		'Validation' => [
-			'Rules.php',
+			'Rule.php',
 			'Validator.php',
 		],
 		'View' => [
@@ -61,6 +62,7 @@ $dirs = [
 			'AuthController.php',
 			'DashboardController.php',
 			'KelasController.php',
+			'PembayaranController.php',
 			'PetugasController.php',
 			'SiswaController.php',
 		],

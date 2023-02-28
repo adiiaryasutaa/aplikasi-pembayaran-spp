@@ -4,7 +4,7 @@ namespace App\Model;
 
 use Core\Auth\Role;
 use Core\Database\Model;
-use PDO;
+use Core\Database\QueryHelper;
 
 class Pengguna extends Model
 {
@@ -23,81 +23,69 @@ class Pengguna extends Model
 		parent::__construct($attributes);
 	}
 
-	public function where(string|array $columns, $value = null)
+	public function where(array $columns): array
 	{
-		$query = "SELECT * FROM $this->table WHERE ";
+		$value = array_values($columns);
+		$columns = array_keys($columns);
 
-		if (is_array($columns)) {
-			$value = array_values($columns);
-			$columns = array_keys($columns);
+		$parameters = QueryHelper::makeColumnBindings($columns);
+		$wheres = QueryHelper::makeWheres($parameters);
 
-			$query .= implode(' AND ', array_map(fn($column) => "$column = :$column", $columns));
-		} else {
-			$query .= "$columns = :$columns";
-		}
-
-		$statement = $this->connection->prepare($query);
-
-		$this->connection->bindValues(
-			$statement,
-			is_array($columns) ? array_combine($columns, $value) : [$columns => $value]
+		$query = sprintf(
+			"SELECT %s FROM %s WHERE %s",
+			'*', $this->table,
+			$wheres,
 		);
 
-		$statement->execute();
-		$this->hasBeenQueried = true;
+		$result = $this->connection->resultAll($query, array_combine($parameters, $value));
 
-		$models = [];
-		foreach ($statement->fetchAll(PDO::FETCH_DEFAULT) as $attributes) {
-			$models[] = new static ($attributes);
-		}
+		$this->queried();
 
-		return $models;
+		return is_array($models = $this->make($result)) ? $models : [$models];
 	}
 
-	public function whereFirst(string|array $columns, $value = null)
+	public function whereFirst(array $columns)
 	{
-		$query = "SELECT * FROM $this->table WHERE ";
+		$value = array_values($columns);
+		$columns = array_keys($columns);
 
-		if (is_array($columns)) {
-			$value = array_values($columns);
-			$columns = array_keys($columns);
+		$parameters = QueryHelper::makeColumnBindings($columns);
+		$wheres = QueryHelper::makeWheres($parameters);
 
-			$query .= implode(' AND ', array_map(fn($column) => "$column = :$column", $columns));
-		} else {
-			$query .= "$columns = :$columns";
-		}
-
-		$query .= " LIMIT 1";
-
-		$statement = $this->connection->prepare($query);
-
-		$this->connection->bindValues(
-			$statement,
-			is_array($columns) ? array_combine($columns, $value) : [$columns => $value]
+		$query = sprintf(
+			"SELECT %s FROM %s WHERE %s LIMIT 1",
+			'*', $this->table,
+			$wheres,
 		);
 
-		$statement->execute();
-		$this->hasBeenQueried = true;
+		$result = $this->connection->result($query, array_combine($parameters, $value));
 
-		if ($result = $statement->fetch()) {
-			$this->attributes = $result;
-		}
+		$this->queried();
+
+		$this->setAttributes($result);
 
 		return $this;
 	}
 
-	public function insert(string $username, string $password, Role $role)
+	public function insert(array $data)
 	{
-		$query = "INSERT INTO $this->table (username, password, role) VALUES (:username, :password, :role)";
+		$columns = array_keys($data);
+		$values = array_values($data);
 
-		$statement = $this->connection->prepare($query);
+		$parameters = QueryHelper::makeColumnBindings(array_combine($columns, ['id']));
 
-		$this->connection->bindValues(
-			$statement,
-			array_merge(compact('username', 'password'), ['role' => $role->value])
+		$query = sprintf(
+			"INSERT INTO %s VALUES (%s)",
+			"$this->table (" . implode(',', $columns) . ')',
+			implode(', ', array_values($parameters))
 		);
 
-		return $statement->execute();
+		$values['role'] = $values['role'] instanceof Role ? $values['role']->value : $values['role'];
+
+		return $this->connection->statement(
+			$query,
+			array_combine(array_values($parameters), array_merge($values, [':id' => $this->id]))
+		);
 	}
 
 	public function isAdmin()

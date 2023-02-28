@@ -9,7 +9,7 @@ use App\View\Layout\Dashboard;
 use Core\Auth\Role;
 use Core\Foundation\Facade\DB;
 use Core\Http\Controller;
-use Core\Validation\Rules;
+use Core\Validation\Rule;
 use Core\Validation\Validator;
 use Exception;
 
@@ -38,13 +38,13 @@ class SiswaController extends Controller
 		];
 
 		$rules = [
-			'nisn' => [Rules::required(), Rules::number(), Rules::max(10), Rules::unique('siswa', 'nisn')],
-			'nis' => [Rules::required(), Rules::number(), Rules::max(5), Rules::unique('siswa', 'nisn')],
-			'nama' => [Rules::required(), Rules::max(50)],
-			'alamat' => [Rules::min(4)],
-			'telepon' => [Rules::max(14)],
-			'username' => [Rules::required(), Rules::max(25), Rules::unique('pengguna', 'username')],
-			'password' => [Rules::required(), Rules::min(6), Rules::max(20)],
+			'nisn' => [Rule::required(), Rule::number(), Rule::max(10), Rule::unique('siswa', 'nisn')],
+			'nis' => [Rule::required(), Rule::number(), Rule::max(5), Rule::unique('siswa', 'nisn')],
+			'nama' => [Rule::required(), Rule::max(50)],
+			'alamat' => [Rule::min(4)],
+			'telepon' => [Rule::max(14)],
+			'username' => [Rule::required(), Rule::max(25), Rule::unique('pengguna', 'username')],
+			'password' => [Rule::required(), Rule::min(6), Rule::max(20)],
 		];
 
 		$validator = Validator::make($inputs, $rules)->validate();

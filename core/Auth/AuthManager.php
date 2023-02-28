@@ -62,7 +62,7 @@ class AuthManager
 		$role = $this->session->get("$this->sessionKey.user.role");
 
 		$pengguna = new Pengguna();
-		$pengguna->where('id', $id);
+		$pengguna->where(['id' => $id]);
 
 
 		if ($role === Role::ADMIN->value || $role === Role::PETUGAS->value) {

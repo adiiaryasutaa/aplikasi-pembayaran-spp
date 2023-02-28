@@ -4,7 +4,6 @@ namespace Core\Database;
 
 use Core\Extension\Database\HasAttributes;
 use Core\Foundation\Application;
-use PDO;
 
 abstract class Model
 {
@@ -24,36 +23,26 @@ abstract class Model
 		$this->attributes = $attributes;
 	}
 
-	//public static function all($columns = ['*'])
-	//{
-	//	$model = new static;
-	//	$connection = $model->getDatabaseConnection();
+	public static function make(array $attributes = [])
+	{
+		if (!is_array($attributes[0])) {
+			return new static ($attributes);
+		}
 
-	//	$query = sprintf(
-	//		"SELECT %s FROM %s",
-	//		implode(', ', is_array($columns) ? $columns : func_get_args()),
-	//		$model->getTable(),
-	//	);
+		$models = [];
 
-	//	$statement = $connection->prepare($query);
+		foreach ($attributes as $attr) {
+			$models[] = new static ($attr);
+		}
 
-	//	if (!$statement->execute()) {
-	//		return null;
-	//	}
 
-	//	$models = [];
+		return $models;
+	}
 
-	//	foreach ($statement->fetchAll(PDO::FETCH_DEFAULT) as $data) {
-	//		$models = new static ($data);
-	//	}
-
-	//	return $models;
-	//}
-
-	//public static function innerJoin(Model $model, string $on)
-	//{
-
-	//}
+	public function queried()
+	{
+		$this->hasBeenQueried = true;
+	}
 
 	public function exists()
 	{

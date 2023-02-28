@@ -3,6 +3,7 @@
 use App\Controller\AuthController;
 use App\Controller\DashboardController;
 use App\Controller\KelasController;
+use App\Controller\PembayaranController;
 use App\Controller\PetugasController;
 use App\Controller\SiswaController;
 use Core\Foundation\Facade\Route;
@@ -26,6 +27,12 @@ Route::post('/siswa', [SiswaController::class, 'create'])->setName('siswa.create
 Route::get('/siswa/{id:\d+}', [SiswaController::class, 'show'])->setName('siswa.show');
 Route::post('/siswa/{id:\d+}/update', [SiswaController::class, 'update'])->setName('siswa.update');
 Route::post('/siswa/{id:\d+}/delete', [SiswaController::class, 'delete'])->setName('siswa.delete');
+
+Route::get('/pembayaran', [PembayaranController::class, 'index'])->setName('pembayaran');
+Route::post('/pembayaran', [PembayaranController::class, 'create'])->setName('pembayaran.create');
+Route::get('/pembayaran/{id:\d+}', [PembayaranController::class, 'show'])->setName('pembayaran.show');
+Route::post('/pembayaran/{id:\d+}/update', [PembayaranController::class, 'update'])->setName('pembayaran.update');
+Route::post('/pembayaran/{id:\d+}/delete', [PembayaranController::class, 'delete'])->setName('pembayaran.delete');
 
 Route::get('/login', [AuthController::class, 'index'])->setName('login');
 Route::post('/login', [AuthController::class, 'authenticate'])->setName('authentication');

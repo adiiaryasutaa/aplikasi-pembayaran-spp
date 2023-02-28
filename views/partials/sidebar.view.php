@@ -27,13 +27,20 @@
 	</div>
 
 	<?php if (!auth()->user()->pengguna->isSiswa()): ?>
-		<li class="nav-item  ">
-			<a class="nav-link" href="index.html">
+		<li class="nav-item >">
+			<a class="nav-link" href="/">
+				<i class="fas fa-fw fa-moon"></i>
+				<span>Transaksi</span></a>
+		</li>
+	<?php endif; ?>
+
+	<?php if (auth()->user()->pengguna->isAdmin()): ?>
+		<li class="nav-item <?= routeIs('pembayaran') ? 'active' : '' ?>">
+			<a class="nav-link" href="<?= route('pembayaran') ?>">
 				<i class="fas fa-fw fa-sink"></i>
 				<span>Pembayaran</span></a>
 		</li>
 	<?php endif; ?>
-
 
 	<li class="nav-item">
 		<a class="nav-link" href="index.html">

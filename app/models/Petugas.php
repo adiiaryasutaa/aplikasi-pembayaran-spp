@@ -4,6 +4,7 @@ namespace App\Model;
 
 use Core\Auth\Role;
 use Core\Database\Model;
+use Core\Database\QueryHelper;
 use Core\Foundation\Facade\DB;
 use Core\Support\Str;
 use Exception;
@@ -15,35 +16,38 @@ class Petugas extends Model
 
 	public function all()
 	{
-		$penggunaTable = (new Pengguna)->getTable();
+		$bindingNames = QueryHelper::makeColumnBindings(['pengguna.role']);
+		$wheres = QueryHelper::makeWhereNot($bindingNames);
+		$values = [$bindingNames['pengguna.role'] => Role::ADMIN->value];
 
-		$query = "SELECT * FROM $this->table INNER JOIN $penggunaTable ON $penggunaTable.id = $this->table.pengguna_id WHERE $penggunaTable.role <> :{$penggunaTable}Role";
+		$query = sprintf(
+			"SELECT %s FROM %s INNER JOIN %s ON %s WHERE %s",
+			'petugas.*, username, password, role', $this->table,
+			'pengguna',
+			"$this->table.pengguna_id = pengguna.id",
+			$wheres
+		);
 
-		$statement = $this->connection->prepare($query);
+		$results = $this->connection->resultAll($query, $values);
 
-		$this->connection->bindValues($statement, ["{$penggunaTable}Role" => Role::ADMIN->value]);
+		$this->queried();
 
-		$statement->execute();
+		$data = [];
 
-		$models = [];
-		foreach ($statement->fetchAll(PDO::FETCH_DEFAULT) as $data) {
+		foreach ($results as $result) {
 			$pengguna = new Pengguna([
-				'id' => $data['pengguna_id'],
-				'username' => $data['username'],
-				'password' => $data['username'],
-				'role' => match ($data['role']) {
-					1 => Role::ADMIN,
-					2 => Role::PETUGAS,
-					3 => Role::SISWA
-				},
+				'id' => $result['pengguna_id'],
+				'username' => $result['username'],
+				'password' => $result['password'],
+				'role' => $result['role']
 			]);
 
-			unset($data['pengguna_id'], $data['username'], $data['username'], $data['role']);
+			unset($result['pengguna_id'], $result['username'], $result['password'], $result['role']);
 
-			$models[] = new static (array_merge($data, compact('pengguna')));
+			$data[] = array_merge($result, compact('pengguna'));
 		}
 
-		return $models;
+		return is_array($models = $this->make($data)) ? $models : [$models];
 	}
 
 	public function where(string|array $columns, $value = null)
