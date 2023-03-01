@@ -3,6 +3,7 @@
 namespace Core\Routing;
 
 use Closure;
+use Core\Foundation\Application;
 use Core\Http\Request;
 use Core\Http\Response;
 use Core\Routing\Route;
@@ -102,8 +103,10 @@ class Router
 	 */
 	public function resolve()
 	{
+		$this->parseQueryString();
+
 		$method = $_SERVER['REQUEST_METHOD'];
-		$uri = $_SERVER['REQUEST_URI'];
+		$uri = request()->uri();
 
 		$route = $this->getRoute($method, $uri);
 
@@ -126,5 +129,10 @@ class Router
 		}
 
 		return $response;
+	}
+
+	protected function parseQueryString()
+	{
+		$query = $_SERVER['QUERY_STRING'];
 	}
 }

@@ -10,6 +10,12 @@
 	</div>
 <?php endif ?>
 
+<?php if (session()->hasFlash('delete-kelas-success')): ?>
+	<div class="alert alert-info" role="alert">
+		<?= session()->getFlash('delete-kelas-success') ?>
+	</div>
+<?php endif ?>
+
 <div class="card shadow mb-4">
 	<div class="card-header d-flex justify-content-between align-items-center py-3">
 		<h5 class="m-0 font-weight-bold text-primary">Kelas</h5>
@@ -56,12 +62,20 @@
 				<div class="modal-body">
 					<div class="form-group mb-4">
 						<label for="name">Nama</label>
-						<input id="name" name="nama" type="text" class="form-control bg-light border border-primary small">
+						<input id="name" name="nama" type="text" class="form-control bg-light border border-primary small"
+							value="<?= old('nama') ?>" required>
+						<?php if (session()->hasError('nama')): ?>
+							<small class="form-text text-danger"><?= error('nama') ?></small>
+						<?php endif; ?>
 					</div>
 					<div class="form-group mb-4">
 						<label for="kompetensi-keahlian">Kompetensi Keahlian</label>
 						<input id="kompetensi-keahlian" name="kompetensi-keahlian" type="text"
-							class="form-control bg-light border border-primary small">
+							class="form-control bg-light border border-primary small" value="<?= old('kompetensi-keahlian') ?>"
+							required>
+						<?php if (session()->hasError('kompetensi-keahlian')): ?>
+							<small class="form-text text-danger"><?= error('kompetensi-keahlian') ?></small>
+						<?php endif; ?>
 					</div>
 				</div>
 				<div class="modal-footer">

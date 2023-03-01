@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Model\Kelas;
 use App\View\Layout\Dashboard;
 use Core\Http\Controller;
+use Core\Validation\Rule;
+use Core\Validation\Validator;
 
 class KelasController extends Controller
 {
@@ -28,49 +30,54 @@ class KelasController extends Controller
 
 	public function create()
 	{
-		$nama = $this->request('nama');
-		$kompetensiKeahlian = $this->request('kompetensi-keahlian');
+		$data = [
+			'nama' => $this->request('nama'),
+			'kompetensi_keahlian' => $this->request('kompetensi-keahlian'),
+		];
 
-		if (trim($nama) === '') {
+		$validator = Validator::make($data, [
+			'nama' => [Rule::required(), Rule::max(10), Rule::unique('kelas', 'nama')],
+			'kompetensi_keahlian' => [Rule::required(), Rule::max(50)],
+		])->validate();
 
+		if ($validator->error()) {
+			return back()->withError($validator->getErrors());
 		}
 
-		if (trim($kompetensiKeahlian) === '') {
-
-		}
-
-		return (new Kelas)->insert($nama, $kompetensiKeahlian) ? 
+		return (new Kelas)->insert($validator->getValidated()) ? 
 			back()->with('create-kelas-success', 'Kelas berhasil ditambahkan') :
 			back()->with('create-kelas-failed', 'Kelas gagal ditambahkan');
 	}
 
 	public function update(int $id)
 	{
-		$inputs = [
+		$data = [
 			'nama' => $this->request('nama'),
 			'kompetensi_keahlian' => $this->request('kompetensi-keahlian'),
 		];
 
 		$kelas = (new Kelas)->whereFirst(['kelas.id' => $id]);
 
-		if (trim($inputs['nama']) === '' || $inputs['nama'] === $kelas->nama) {
-			unset($inputs['nama']);
+		$validator = Validator::make($data, [
+			'nama' => [Rule::required(), Rule::max(10), Rule::unique('kelas', 'nama', $kelas->nama)],
+			'kompetensi_keahlian' => [Rule::required(), Rule::max(50)],
+		])->validate();
+
+		if ($validator->error()) {
+			return back()->withError($validator->getErrors());
 		}
 
-		if (trim($inputs['kompetensi_keahlian']) === '' || $inputs['kompetensi_keahlian'] === $kelas->kompetensi_keahlian) {
-			unset($inputs['kompetensi_keahlian']);
-		}
-
-		if (!empty($inputs)) {
-			return $kelas->update($inputs) ? 
-				back()->with('update-kelas-success', 'Kelas berhasil diperbarui') :
-				back()->with('update-kelas-failed', 'Kelas gagal diperbarui');
-		}
-		return back()->with('update-kelas-canceled', 'Petugas tidak diperbarui, karena data tidak ada yang berubah atau semua input kosong');
+		return $kelas->update($validator->getValidated()) ? 
+			back()->with('update-kelas-success', 'Kelas berhasil diperbarui') :
+			back()->with('update-kelas-failed', 'Kelas gagal diperbarui');
 	}
 
 	public function delete(int $id)
 	{
-		# code...
+		$kelas = (new Kelas)->whereFirst(['kelas.id' => $id]);
+
+		return $kelas->delete() ? 
+			redirect(route('kelas'))->with('delete-kelas-success', 'Kelas berhasil dihapus') :
+			back()->with('delete-kelas-failed', 'Kelas gagal dihapus');
 	}
 }

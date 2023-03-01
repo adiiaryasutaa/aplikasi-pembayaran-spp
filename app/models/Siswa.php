@@ -4,6 +4,7 @@ namespace App\Model;
 
 use Core\Auth\Role;
 use Core\Database\Model;
+use Core\Database\QueryHelper;
 use Core\Support\Str;
 use PDO;
 
@@ -111,10 +112,8 @@ class Siswa extends Model
 	{
 		$values = array_values($columns);
 		$columns = array_keys($columns);
-		$bindingNames = array_combine(
-			$columns,
-			array_map(fn($column) => ':' . Str::camelCase($column, '.'), $columns)
-		);
+		$bindings = QueryHelper::makeColumnBindings($columns);
+		$wheres = QueryHelper::makeWheres($bindings);
 
 		$query = sprintf(
 			"SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s INNER JOIN %s ON %s WHERE %s",
@@ -126,36 +125,101 @@ class Siswa extends Model
 			'siswa.pengguna_id = pengguna.id',
 			'pembayaran',
 			'siswa.pembayaran_id = pembayaran.id',
-			implode(array_map(fn($column) => "$column = {$bindingNames[$column]}", $columns))
+			$wheres
 		);
 
-		$data = $this->connection->result($query, array_combine($bindingNames, $values));
-		$this->hasBeenQueried = true;
+		$data = $this->connection->result($query, array_combine($bindings, $values));
 
-		$this->attributes = [
-			'id' => $data['id'],
-			'nisn' => $data['nisn'],
-			'nis' => $data['nis'],
-			'nama' => $data['nama'],
-			'alamat' => $data['alamat'],
-			'telepon' => $data['telepon'],
-			'kelas' => new Kelas([
-				'id' => $data['kelas_id'],
-				'nama' => $data['nama_kelas'],
-				'kompetensi_keahlian' => $data['kompetensi_keahlian'],
-			]),
-			'pengguna' => new Pengguna([
-				'id' => $data['pengguna_id'],
-				'username' => $data['username'],
-				'password' => $data['password'],
-				'role' => $data['role'],
-			]),
-			'pembayaran' => new Pembayaran([
-				'id' => $data['pembayaran_id'],
-				'tahun_ajaran' => $data['tahun_ajaran'],
-				'nominal' => $data['nominal'],
-			]),
-		];
+		$this->queried();
+
+		if ($data) {
+			$this->setAttributes([
+				'id' => $data['id'],
+				'nisn' => $data['nisn'],
+				'nis' => $data['nis'],
+				'nama' => $data['nama'],
+				'alamat' => $data['alamat'],
+				'telepon' => $data['telepon'],
+				'kelas' => new Kelas([
+					'id' => $data['kelas_id'],
+					'nama' => $data['nama_kelas'],
+					'kompetensi_keahlian' => $data['kompetensi_keahlian'],
+				]),
+				'pengguna' => new Pengguna([
+					'id' => $data['pengguna_id'],
+					'username' => $data['username'],
+					'password' => $data['password'],
+					'role' => $data['role'],
+				]),
+				'pembayaran' => new Pembayaran([
+					'id' => $data['pembayaran_id'],
+					'tahun_ajaran' => $data['tahun_ajaran'],
+					'nominal' => $data['nominal'],
+				]),
+			]);
+		}
+
+		return $this;
+	}
+
+	public function getDetailTransaksiWhere(array $columns)
+	{
+		$values = array_values($columns);
+		$columns = array_keys($columns);
+		$bindings = QueryHelper::makeColumnBindings($columns);
+		$wheres = QueryHelper::makeWheres($bindings);
+
+		$query = sprintf(
+			"SELECT %s FROM %s LEFT JOIN %s ON %s LEFT JOIN %s ON %s LEFT JOIN %s ON %s WHERE %s",
+			'siswa.*, transaksi.id AS id_transaksi, transaksi.tanggal_dibayar, transaksi.bulan_dibayar, transaksi.tahun_dibayar, petugas.nama AS nama_petugas, pembayaran.tahun_ajaran, pembayaran.nominal',
+			'siswa',
+			'transaksi',
+			'siswa.id = transaksi.siswa_id',
+			'petugas',
+			'petugas.id = transaksi.petugas_id',
+			'pembayaran',
+			'pembayaran.id = transaksi.pembayaran_id',
+			$wheres,
+		);
+
+		$result = $this->connection->resultAll($query, array_combine($bindings, $values));
+
+		$this->queried();
+
+		if (!empty($result)) {
+			$siswa = $result[0];
+
+			$this->setAttributes([
+				'id' => $siswa['id'],
+				'nisn' => $siswa['nisn'],
+				'nis' => $siswa['nis'],
+				'nama' => $siswa['nama'],
+				'alamat' => $siswa['alamat'],
+				'telepon' => $siswa['telepon'],
+			]);
+
+			$transaksi = [];
+
+			if (isset($result[0]['id_transaksi'])) {
+				foreach ($result as $data) {
+					$transaksi[] = new Transaksi([
+						'id' => $data['id_transaksi'],
+						'tanggal_dibayar' => $data['tanggal_dibayar'],
+						'bulan_dibayar' => $data['bulan_dibayar'],
+						'tahun_dibayar' => $data['tahun_dibayar'],
+						'petugas' => new Petugas([
+							'nama' => $data['nama_petugas']
+						]),
+						'pembayaran' => new Pembayaran([
+							'tahun_ajaran' => $data['tahun_ajaran'],
+							'nominal' => $data['nominal'],
+						]),
+					]);
+				}
+			}
+
+			$this->setAttribute('transaksi', $transaksi);
+		}
 
 		return $this;
 	}

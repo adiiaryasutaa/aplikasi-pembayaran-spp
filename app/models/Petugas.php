@@ -5,10 +5,6 @@ namespace App\Model;
 use Core\Auth\Role;
 use Core\Database\Model;
 use Core\Database\QueryHelper;
-use Core\Foundation\Facade\DB;
-use Core\Support\Str;
-use Exception;
-use PDO;
 
 class Petugas extends Model
 {
@@ -50,123 +46,76 @@ class Petugas extends Model
 		return is_array($models = $this->make($data)) ? $models : [$models];
 	}
 
-	public function where(string|array $columns, $value = null)
+	public function where(array $columns)
 	{
-		$query = "SELECT * FROM $this->table WHERE ";
-
-		if (is_array($columns)) {
-			$value = array_values($columns);
-			$columns = array_keys($columns);
-
-			$query .= implode(' AND ', array_map(fn($column) => "$column = :$column", $columns));
-		} else {
-			$query .= "$columns = :$columns";
-		}
-
-		$statement = $this->connection->prepare($query);
-
-		$this->connection->bindValues(
-			$statement,
-			is_array($columns) ? array_combine($columns, $value) : [$columns => $value]
-		);
-
-		$statement->execute();
-		$this->hasBeenQueried = true;
-
-		$models = [];
-		foreach ($statement->fetchAll(PDO::FETCH_DEFAULT) as $attributes) {
-			$models[] = new static ($attributes);
-		}
-
-		return $models;
-	}
-
-	public function whereFirst(string|array $columns, $value = null)
-	{
-		$query = "SELECT * FROM $this->table WHERE ";
-
-		if (is_array($columns)) {
-			$value = array_values($columns);
-			$columns = array_keys($columns);
-
-			$query .= implode(' AND ', array_map(fn($column) => "$column = :$column", $columns));
-		} else {
-			$query .= "$columns = :$columns";
-		}
-
-		$query .= " LIMIT 1";
-
-		$statement = $this->connection->prepare($query);
-
-		$this->connection->bindValues(
-			$statement,
-			is_array($columns) ? array_combine($columns, $value) : [$columns => $value]
-		);
-
-		$statement->execute();
-		$this->hasBeenQueried = true;
-
-		$this->attributes = $statement->fetch();
-
-		return $this;
-	}
-
-	public function joinWithPetugasWhereFirst(string|array $columns, $value = null)
-	{
-		$penggunaTable = (new Pengguna)->getTable();
-
-		$query = "SELECT %s FROM %s INNER JOIN %s ON %s WHERE %s";
-
-		$wheres = [];
-		$bindingNames = [];
-		$value = array_values($columns);
-
-		if (is_array($columns)) {
-			$columns = array_keys($columns);
-
-			foreach ($columns as $column) {
-				$bindingNames[$column] = Str::camelCase($column, '.');
-			}
-		} else {
-			$bindingNames[$columns] = Str::camelCase($columns, '.');
-		}
-
-		foreach ($columns as $i => $column) {
-			$wheres[] = "$column = :{$bindingNames[$column]}";
-		}
+		$values = array_values($columns);
+		$columns = array_keys($columns);
+		$bindings = QueryHelper::makeColumnBindings($columns);
+		$wheres = QueryHelper::makeWheres($bindings);
 
 		$query = sprintf(
-			$query,
+			"SELECT %s FROM %s WHERE %s",
+			'*', $this->table,
+			$wheres
+		);
+
+		$result = $this->connection->resultAll($query, array_combine($bindings, $values));
+
+		$this->queried();
+
+		return is_array($models = $this->make($result)) ? $models : [$models];
+	}
+
+	public function whereFirst(array $columns)
+	{
+		$values = array_values($columns);
+		$columns = array_keys($columns);
+		$bindings = QueryHelper::makeColumnBindings($columns);
+		$wheres = QueryHelper::makeWheres($bindings);
+
+		$query = sprintf(
+			"SELECT %s FROM %s WHERE %s LIMIT 1",
+			'*', $this->table,
+			$wheres
+		);
+
+		$result = $this->connection->result($query, array_combine($bindings, $values));
+
+		$this->queried();
+
+		return $this->make($result);
+	}
+
+	public function getDetailWhere(array $columns)
+	{
+		$values = array_values($columns);
+		$columns = array_keys($columns);
+		$bindings = QueryHelper::makeColumnBindings($columns);
+		$wheres = QueryHelper::makeWheres($bindings);
+
+		$query = sprintf(
+			"SELECT %s FROM %s INNER JOIN %s ON %s WHERE %s LIMIT 1",
 			'petugas.id AS petugasId, nama, pengguna.id AS penggunaId, username, password, role',
 			$this->table,
-			$penggunaTable,
-			"$penggunaTable.id = $this->table.pengguna_id",
-			implode(' AND ', $wheres),
+			'pengguna',
+			"pengguna.id = $this->table.pengguna_id",
+			$wheres,
 		);
 
-		$statement = $this->connection->prepare($query);
+		$result = $this->connection->result($query, array_combine($bindings, $values));
 
-		$this->connection->bindValues(
-			$statement,
-			array_combine(array_values($bindingNames), $value),
-		);
+		$this->queried();
 
-		if ($statement->execute()) {
-			$result = $statement->fetch();
-
-			$this->attributes = $result ? [
-				'id' => $result['petugasId'],
-				'nama' => $result['nama'],
-				'pengguna' => new Pengguna([
-					'id' => $result['penggunaId'],
-					'username' => $result['username'],
-					'password' => $result['password'],
-					'role' => $result['role'],
-				]),
-			] : [];
-		}
-
-		$this->hasBeenQueried = true;
+		$this->setAttributes([
+			'id' => $result['petugasId'],
+			'nama' => $result['nama'],
+			'pengguna' => new Pengguna([
+				'id' => $result['penggunaId'],
+				'username' => $result['username'],
+				'password' => $result['password'],
+				'role' => $result['role'],
+			]),
+		]);
 
 		return $this;
 	}
@@ -225,86 +174,52 @@ class Petugas extends Model
 		return $this;
 	}
 
-	public function insert(string $nama, int $penggunaId)
+	public function insert(array $data)
 	{
-		$query = "INSERT INTO $this->table (nama, pengguna_id) VALUES (:nama, :penggunaId)";
-
-		$statement = $this->connection->prepare($query);
-
-		$this->connection->bindValues($statement, compact('nama', 'penggunaId'));
-
-		return $statement->execute();
-	}
-
-	public function update(array $data = [])
-	{
-		$query = "UPDATE %s INNER JOIN %s ON %s SET %s WHERE %s";
-
-		$values = array_values($data);
 		$columns = array_keys($data);
-
-		$bindingNames = [];
-
-		foreach ($columns as $column) {
-			$bindingNames[$column] = ':' . Str::camelCase($column, '.');
-		}
+		$values = array_values($data);
+		$parameters = QueryHelper::makeColumnBindings($columns);
 
 		$query = sprintf(
-			$query,
+			"INSERT INTO %s (%s) VALUES (%s)",
 			$this->table,
-			'pengguna',
-			"$this->table.pengguna_id = pengguna.id",
-			implode(', ', array_map(fn($column) => "$column = {$bindingNames[$column]}", $columns)),
-			"$this->table.id = :id"
+			implode(', ', $columns),
+			implode(', ', $parameters),
 		);
 
-		$statement = $this->connection->prepare($query);
-
-		$this->connection->bindValues(
-			$statement,
-			array_merge(array_combine($columns, $values), ['id' => $this->id])
-		);
-
-		return $statement->execute();
+		return $this->connection->statement($query, array_combine($parameters, $values));
 	}
 
-	public function deleteWhere(array $columns = [])
+	public function update(array $data)
 	{
-		$query = "DELETE %s, %s FROM %s INNER JOIN %s ON %s WHERE %s";
-
-		$values = array_values($columns);
-		$columns = array_keys($columns);
+		$columns = array_keys($data);
+		$values = array_merge(array_values($data), [$this->id]);
+		$bindings = QueryHelper::makeColumnBindings(array_merge($columns, ['id']));
+		$sets = QueryHelper::makeSet(array_diff_key($bindings, ['id' => 'id']));
+		$where = QueryHelper::makeWheres(array_intersect_key($bindings, ['id' => 'id']));
 
 		$query = sprintf(
-			$query,
+			"UPDATE %s SET %s WHERE %s",
 			$this->table,
-			'pengguna',
-			$this->table,
-			'pengguna',
-			"$this->table.pengguna_id = pengguna.id",
-			implode(' AND ', array_map(fn($column) => "$column = :$column", $columns)),
+			$sets,
+			$where
 		);
 
-		try {
-			DB::beginTransaction();
+		return $this->connection->statement($query, array_combine($bindings, $values));
+	}
 
-			$statement = $this->connection->prepare($query);
+	public function delete()
+	{
+		$columns = ['id'];
+		$values = [$this->id];
+		$where = QueryHelper::makeWheres(QueryHelper::makeColumnBindings($columns));
 
-			$this->connection->bindValues($statement, array_combine($columns, $values));
+		$query = sprintf(
+			"DELETE FROM %s WHERE %s",
+			$this->table,
+			$where,
+		);
 
-			if (!$statement->execute()) {
-				throw new Exception();
-			}
-
-			DB::commit();
-
-			return true;
-		} catch (Exception $ex) {
-			DB::rollback();
-			dd($ex->getMessage());
-
-			return false;
-		}
-
+		return $this->connection->statement($query, array_combine($columns, $values));
 	}
 }

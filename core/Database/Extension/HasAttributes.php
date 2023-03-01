@@ -29,4 +29,9 @@ trait HasAttributes
 	{
 		return isset($this->attributes[$name]);
 	}
+
+	protected function resetAttributes()
+	{
+		$this->attributes = [];
+	}
 }

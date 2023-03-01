@@ -28,8 +28,8 @@ class Pengguna extends Model
 		$value = array_values($columns);
 		$columns = array_keys($columns);
 
-		$parameters = QueryHelper::makeColumnBindings($columns);
-		$wheres = QueryHelper::makeWheres($parameters);
+		$bindings = QueryHelper::makeColumnBindings($columns);
+		$wheres = QueryHelper::makeWheres($bindings);
 
 		$query = sprintf(
 			"SELECT %s FROM %s WHERE %s",
@@ -37,7 +37,7 @@ class Pengguna extends Model
 			$wheres,
 		);
 
-		$result = $this->connection->resultAll($query, array_combine($parameters, $value));
+		$result = $this->connection->resultAll($query, array_combine($bindings, $value));
 
 		$this->queried();
 
@@ -69,23 +69,56 @@ class Pengguna extends Model
 
 	public function insert(array $data)
 	{
+		$data['role'] = $data['role'] instanceof Role ? $data['role']->value : $data['role'];
+
 		$columns = array_keys($data);
 		$values = array_values($data);
-
-		$parameters = QueryHelper::makeColumnBindings(array_combine($columns, ['id']));
+		$parameters = QueryHelper::makeColumnBindings(array_merge($columns));
 
 		$query = sprintf(
-			"INSERT INTO %s VALUES (%s)",
-			"$this->table (" . implode(',', $columns) . ')',
-			implode(', ', array_values($parameters))
+			"INSERT INTO %s (%s) VALUES (%s)",
+			"$this->table",
+			implode(', ', $columns),
+			implode(', ', $parameters),
 		);
-
-		$values['role'] = $values['role'] instanceof Role ? $values['role']->value : $values['role'];
 
 		return $this->connection->statement(
 			$query,
-			array_combine(array_values($parameters), array_merge($values, [':id' => $this->id]))
+			array_combine($parameters, $values)
 		);
+	}
+
+	public function update(array $data)
+	{
+		$columns = array_keys($data);
+		$values = array_merge(array_values($data), [$this->id]);
+		$bindings = QueryHelper::makeColumnBindings(array_merge($columns, ['id']));
+		$sets = QueryHelper::makeSet(array_diff_key($bindings, ['id' => 'id']));
+		$where = QueryHelper::makeWheres(array_intersect_key($bindings, ['id' => 'id']));
+
+		$query = sprintf(
+			"UPDATE %s SET %s WHERE %s",
+			$this->table,
+			$sets,
+			$where
+		);
+
+		return $this->connection->statement($query, array_combine($bindings, $values));
+	}
+
+	public function delete()
+	{
+		$columns = ['id'];
+		$values = [$this->id];
+		$where = QueryHelper::makeWheres(QueryHelper::makeColumnBindings($columns));
+
+		$query = sprintf(
+			"DELETE %s WHERE %s",
+			$this->table,
+			$where,
+		);
+
+		return $this->connection->statement($query, array_combine($columns, $values));
 	}
 
 	public function isAdmin()

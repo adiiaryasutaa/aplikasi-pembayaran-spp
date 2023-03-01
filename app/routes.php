@@ -6,6 +6,7 @@ use App\Controller\KelasController;
 use App\Controller\PembayaranController;
 use App\Controller\PetugasController;
 use App\Controller\SiswaController;
+use App\Controller\TransaksiController;
 use Core\Foundation\Facade\Route;
 
 Route::get('/', [DashboardController::class, 'index'])->setName('dashboard');
@@ -33,6 +34,10 @@ Route::post('/pembayaran', [PembayaranController::class, 'create'])->setName('pe
 Route::get('/pembayaran/{id:\d+}', [PembayaranController::class, 'show'])->setName('pembayaran.show');
 Route::post('/pembayaran/{id:\d+}/update', [PembayaranController::class, 'update'])->setName('pembayaran.update');
 Route::post('/pembayaran/{id:\d+}/delete', [PembayaranController::class, 'delete'])->setName('pembayaran.delete');
+
+Route::get('/transaksi', [TransaksiController::class, 'index'])->setName('transaksi');
+
+Route::post('/siswa/{id:\d+}/bayar', [TransaksiController::class, 'pay'])->setName('transaksi.pay');
 
 Route::get('/login', [AuthController::class, 'index'])->setName('login');
 Route::post('/login', [AuthController::class, 'authenticate'])->setName('authentication');

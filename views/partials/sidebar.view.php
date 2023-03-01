@@ -27,8 +27,8 @@
 	</div>
 
 	<?php if (!auth()->user()->pengguna->isSiswa()): ?>
-		<li class="nav-item >">
-			<a class="nav-link" href="/">
+		<li class="nav-item <?= routeIs('transaksi') ? 'active' : '' ?>">
+			<a class="nav-link" href="<?= route('transaksi') ?>">
 				<i class="fas fa-fw fa-moon"></i>
 				<span>Transaksi</span></a>
 		</li>

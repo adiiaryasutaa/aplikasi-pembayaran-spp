@@ -46,12 +46,12 @@ class Rule
 		];
 	}
 
-	public static function unique(string $table, string $column)
+	public static function unique(string $table, string $column, $except = null)
 	{
 		return [
 			'name' => 'unique',
 			'error' => "Data ini sudah terdaftar",
-			'action' => function ($data) use ($table, $column) {
+			'action' => function ($data) use ($table, $column, $except) {
 				$query = sprintf(
 					"SELECT %s FROM %s WHERE %s",
 					$column,
@@ -59,7 +59,13 @@ class Rule
 					"$column = :$column",
 				);
 
-				return empty(DB::result($query, [$column => $data]));
+				$result = DB::result($query, [$column => $data]);
+
+				if (empty($result)) {
+					return true;
+				}
+
+				return is_null($except) ? false : $result[$column] === $except;
 			},
 		];
 	}

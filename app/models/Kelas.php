@@ -3,8 +3,7 @@
 namespace App\Model;
 
 use Core\Database\Model;
-use Core\Support\Str;
-use PDO;
+use Core\Database\QueryHelper;
 
 class Kelas extends Model
 {
@@ -12,10 +11,8 @@ class Kelas extends Model
 
 	public function all()
 	{
-		$query = "SELECT %s FROM %s LEFT JOIN %s ON %s GROUP BY %s";
-
 		$query = sprintf(
-			$query,
+			"SELECT %s FROM %s LEFT JOIN %s ON %s GROUP BY %s",
 			"$this->table.*, COUNT(siswa.id) AS total_siswa",
 			$this->table,
 			'siswa',
@@ -23,33 +20,21 @@ class Kelas extends Model
 			"$this->table.id",
 		);
 
-		$statement = $this->connection->prepare($query);
+		$result = $this->connection->resultAll($query);
 
-		$statement->execute();
+		$this->queried();
 
-		$models = [];
-
-		foreach ($statement->fetchAll(PDO::FETCH_DEFAULT) as $data) {
-			$models[] = new static ($data);
-		}
-
-		return $models;
+		return is_array($models = $this->make($result)) ? $models : [$models];
 	}
 
 	public function whereFirst(array $columns = [])
 	{
-		$query = "SELECT %s FROM %s LEFT JOIN %s ON %s WHERE %s LIMIT 1";
-
 		$values = array_values($columns);
 		$columns = array_keys($columns);
-
-		$bindingNames = array_combine(
-			$columns,
-			array_map(fn($column) => ':' . Str::camelCase($column, '.'), $columns)
-		);
+		$bindingNames = QueryHelper::makeColumnBindings($columns);
 
 		$query = sprintf(
-			$query,
+			"SELECT %s FROM %s LEFT JOIN %s ON %s WHERE %s LIMIT 1",
 			"$this->table.*, COUNT(siswa.id) AS total_siswa",
 			$this->table,
 			'siswa',
@@ -57,63 +42,66 @@ class Kelas extends Model
 			implode(' AND ', array_map(fn($column) => "$column = {$bindingNames[$column]}", $columns)),
 		);
 
-		$statement = $this->connection->prepare($query);
+		$result = $this->connection->result($query, array_combine($bindingNames, $values));
 
-		$this->connection->bindValues(
-			$statement,
-			array_combine(array_values($bindingNames), $values)
-		);
+		$this->queried();
 
-		if ($statement->execute() && $result = $statement->fetch()) {
-			$this->attributes = $result;
-		}
+		$this->setAttributes($result);
 
 		return $this;
 	}
 
-	public function insert(string $nama, string $kompetensiKeahlian)
+	public function insert(array $data)
 	{
-		$query = "INSERT INTO %s VALUES (%s)";
+		$columns = array_keys($data);
+		$values = array_values($data);
+		$bindingNames = QueryHelper::makeColumnBindings($columns);
 
 		$query = sprintf(
-			$query,
-			"$this->table (nama, kompetensi_keahlian)",
-			":nama, :kompetensiKeahlian"
+			"INSERT INTO %s (%s) VALUES (%s)",
+			"$this->table",
+			implode(', ', $columns),
+			implode(',', $bindingNames),
 		);
 
-		$statement = $this->connection->prepare($query);
-
-		$this->connection->bindValues($statement, compact('nama', 'kompetensiKeahlian'));
-
-		return $statement->execute();
+		return $this->connection->statement($query, array_combine($bindingNames, $values));
 	}
 
 	public function update(array $data)
 	{
-		$query = "UPDATE %s SET %s WHERE %s";
-
-		$values = array_values($data);
 		$columns = array_keys($data);
-
-		$bindingNames = array_combine(
-			$columns,
-			array_map(fn($column) => ':' . Str::camelCase($column, '.'), $columns),
-		);
+		$values = array_merge(array_values($data), [$this->id]);
+		$bindingNames = QueryHelper::makeColumnBindings(array_merge($columns, ['id']));
+		$sets = QueryHelper::makeSet(array_diff_key($bindingNames, ['id' => 'id']));
+		$wheres = QueryHelper::makeWheres(array_intersect_key($bindingNames, ['id' => 'id']));
 
 		$query = sprintf(
-			$query,
+			"UPDATE %s SET %s WHERE %s",
 			$this->table,
-			implode(', ', array_map(fn($column) => "$column = {$bindingNames[$column]}", $columns)),
-			'id = :id',
+			$sets,
+			$wheres,
 		);
 
-		$statement = $this->connection->prepare($query);
+		return $this->connection->statement($query, array_combine($bindingNames, $values));
+	}
 
-		$this->connection->bindValues(
-			$statement,
-			array_merge(array_combine($columns, $values), ['id' => $this->id])
+	public function delete()
+	{
+		$bindingNames = QueryHelper::makeColumnBindings(['id']);
+		$where = QueryHelper::makeWheres($bindingNames);
+
+		$query = sprintf(
+			"DELETE FROM %s WHERE %s",
+			$this->table,
+			$where
 		);
 
-		return $statement->execute();
+		$bool = $this->connection->statement($query, array_combine($bindingNames, [$this->id]));
+
+		if ($bool) {
+			$this->resetAttributes();
+		}
+
+		return $bool;
 	}
 }

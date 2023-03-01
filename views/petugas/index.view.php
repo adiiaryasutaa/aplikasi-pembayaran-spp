@@ -5,7 +5,7 @@
 <?php endif ?>
 
 <?php if (session()->hasFlash('create-petugas-failed')): ?>
-	<div class="alert alert-success" role="alert">
+	<div class="alert alert-danger" role="alert">
 		<?= session()->getFlash('create-petugas-failed') ?>
 	</div>
 <?php endif ?>
@@ -27,7 +27,6 @@
 				<thead>
 					<tr>
 						<th>Nama</th>
-						<th>Role</th>
 						<th>Username</th>
 						<th>Aksi</th>
 					</tr>
@@ -36,9 +35,6 @@
 					<?php foreach ($petugas as $p): ?>
 						<tr>
 							<td><?= $p->nama ?></td>
-							<td><span
-									class="<?= $p->pengguna->isAdmin() ? 'bg-danger' : 'bg-info' ?> py-1 px-2 rounded text-white font-weight-bolder"><?= $p->pengguna->isAdmin() ? 'ADMIN' : 'PETUGAS' ?></span>
-							</td>
 							<td><?= $p->pengguna->username ?></td>
 							<td>
 								<a href="<?= route('petugas.show', ['username' => $p->pengguna->username]) ?>"
@@ -64,17 +60,34 @@
 				</div>
 				<div class="modal-body">
 					<div class="form-group mb-4">
-						<label for="name">Nama</label>
-						<input id="name" name="nama" type="text" class="form-control bg-light border border-primary small">
+						<label for="nama">Nama</label>
+						<input id="nama" name="nama" type="text" class="form-control bg-light border border-primary small"
+							value="<?= old('nama') ?>" required>
+
+						<?php if (session()->hasError('nama')): ?>
+							<small class="form-text text-danger"><?= error('nama') ?></small>
+						<?php endif; ?>
+
 					</div>
 					<div class="form-group mb-4">
 						<label for="username">Username</label>
-						<input id="username" name="username" type="text" class="form-control bg-light border border-primary small">
+						<input id="username" name="username" type="text" class="form-control bg-light border border-primary small"
+							value="<?= old('username') ?>" required>
+
+						<?php if (session()->hasError('username')): ?>
+							<small class="form-text text-danger"><?= error('username') ?></small>
+						<?php endif; ?>
+
 					</div>
 					<div class="form-group">
 						<label for="password">Password</label>
 						<input id="password" name="password" type="password"
-							class="form-control bg-light border border-primary small">
+							class="form-control bg-light border border-primary small" required>
+
+						<?php if (session()->hasError('password')): ?>
+							<small class="form-text text-danger"><?= error('password') ?></small>
+						<?php endif; ?>
+
 					</div>
 				</div>
 				<div class="modal-footer">

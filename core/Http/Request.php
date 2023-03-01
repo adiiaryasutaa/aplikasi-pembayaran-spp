@@ -17,6 +17,8 @@ class Request
 	{
 		if ($this->method() === 'POST') {
 			$this->session->putInput($_POST);
+		} else {
+			$this->session->putInput($this->queries());
 		}
 	}
 
@@ -26,7 +28,7 @@ class Request
 	 */
 	public function uri()
 	{
-		return $_SERVER['REQUEST_URI'];
+		return explode('?', $_SERVER['REQUEST_URI'])[0];
 	}
 
 	/**
@@ -53,10 +55,38 @@ class Request
 		$inputs = [];
 
 		foreach ($names as $name) {
-			$inputs[] = $this->$name ?? null;
+			$inputs[$name] = $this->string($name) ?? null;
 		}
 
 		return $inputs;
+	}
+
+	public function queries()
+	{
+		$query = explode('?', $_SERVER['REQUEST_URI']);
+
+		if (!isset($query[1])) {
+			return [];
+		}
+
+		$sections = explode('&', $query[1]);
+
+		$names = [];
+		$values = [];
+
+		foreach ($sections as $section) {
+			[$name, $value] = explode('=', $section);
+
+			$names[] = $name;
+			$values[] = $value;
+		}
+
+		return array_combine($names, $values);
+	}
+
+	public function query(string $name)
+	{
+		return $this->queries()[$name] ?? null;
 	}
 
 	/**

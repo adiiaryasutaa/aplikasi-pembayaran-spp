@@ -8,6 +8,8 @@ use App\View\Layout\Dashboard;
 use Core\Auth\Role;
 use Core\Foundation\Facade\DB;
 use Core\Http\Controller;
+use Core\Validation\Rule;
+use Core\Validation\Validator;
 use Exception;
 
 class PetugasController extends Controller
@@ -19,7 +21,10 @@ class PetugasController extends Controller
 			return redirect('login');
 		}
 
-		return view('petugas/index', ['petugas' => (new Petugas)->all()])
+		$petugas = (new Petugas)->all();
+
+		return view('petugas/index')
+			->with(compact('petugas'))
 			->useLayout(new Dashboard());
 	}
 
@@ -30,22 +35,36 @@ class PetugasController extends Controller
 			return redirect('login');
 		}
 
-		[$nama, $username, $password] = $this->request()->only(['nama', 'username', 'password']);
+		$inputs = $this->request()->only(['nama', 'username', 'password']);
+
+		$validator = Validator::make($inputs, [
+			'nama' => [Rule::required(), Rule::max(50)],
+			'username' => [Rule::required(), Rule::max(25), Rule::unique('pengguna', 'username')],
+			'password' => [Rule::required(), Rule::max(20)],
+		])->validate();
+
+		if ($validator->error()) {
+			return back()->withError($validator->getErrors());
+		}
+
+		$data = $validator->getValidated();
+		$data['role'] = Role::PETUGAS;
 
 		try {
 			DB::beginTransaction();
 
 			$pengguna = new Pengguna();
 
-			if (!$pengguna->insert($username, password_hash($password, PASSWORD_BCRYPT), Role::PETUGAS)) {
+			if (!$pengguna->insert(array_diff_key($data, ['nama' => 'nama']))) {
 				throw new Exception("Failed insert into table pengguna");
 			}
 
-			$pengguna->whereFirst('username', $username);
+			$pengguna->whereFirst(['username' => $data['username']]);
+			$data['pengguna_id'] = $pengguna->id;
 
 			$petugas = new Petugas();
 
-			if (!$petugas->insert($nama, $pengguna->id)) {
+			if (!$petugas->insert(array_intersect_key($data, ['nama' => 'nama', 'pengguna_id' => 'pengguna_id']))) {
 				throw new Exception("Failed insert into petugas");
 			}
 
@@ -54,6 +73,8 @@ class PetugasController extends Controller
 			return back()->with('create-petugas-success', 'Petugas berhasil ditambahkan');
 		} catch (Exception $ex) {
 			DB::rollback();
+
+			dd($ex);
 
 			return back()->with('create-petugas-failed', 'Petugas gagal ditambahkan');
 		}
@@ -66,8 +87,9 @@ class PetugasController extends Controller
 			return redirect('login');
 		}
 
-		$petugas = new Petugas();
-		$petugas->joinWithPetugasWhereFirst(['pengguna.username' => $username, 'pengguna.role' => Role::PETUGAS->value]);
+		$petugas = (new Petugas())->getDetailWhere(
+			['pengguna.username' => $username, 'pengguna.role' => Role::PETUGAS->value]
+		);
 
 		return $petugas->exists() ? 
 				view('petugas/detail')
@@ -78,50 +100,53 @@ class PetugasController extends Controller
 
 	public function update(string $username)
 	{
-		$petugas = (new Petugas)->joinWithPetugasWhereFirst(['pengguna.username' => $username]);
+		$inputs = $this->request()->only(['nama', 'username', 'password']);
 
-		$inputs = [
-			'nama' => $this->request('nama'),
-			'username' => $this->request('username'),
-			'password' => $this->request('password'),
-		];
+		$validator = Validator::make($inputs, [
+			'nama' => [Rule::required(), Rule::max(50)],
+			'username' => [Rule::required(), Rule::max(25), Rule::unique('pengguna', 'username', $inputs['username'])],
+			'password' => [Rule::max(20)],
+		])->validate();
 
-		$updates = [];
-
-		if ($petugas->nama !== $inputs['nama']) {
-			$updates['nama'] = $inputs['nama'];
+		if ($validator->error()) {
+			return back()->withError($validator->getErrors());
 		}
 
-		if ($petugas->pengguna->username !== $inputs['username']) {
-			$updates['username'] = $inputs['username'];
+		$data = $validator->getValidated();
+
+		if (!strlen($data['password'])) {
+			unset($data['password']);
 		}
 
-		if (
-			// check is string empty or blank 
-			trim($inputs['password']) !== '' &&
-			password_verify($inputs['password'], $petugas->pengguna->password)
-		) {
-			$updates['password'] = password_hash($inputs['password'], PASSWORD_BCRYPT);
-		}
+		$petugas = (new Petugas)->getDetailWhere(['pengguna.username' => $username]);
 
-		if (!empty($updates)) {
-			if ($petugas->update($updates)) {
-				$response = isset($updates['username']) ? 
-					redirect(route('petugas.show', ['username' => $updates['username']])) :
-					back()->with('update-petugas-success', 'Petugas berhasil diperbarui');
+		try {
+			DB::beginTransaction();
 
-				return $response->with('update-petugas-success', 'Petugas berhasil diperbarui');
+			if (!$petugas->pengguna->update(array_diff_key($data, ['nama' => 'nama']))) {
+				throw new Exception("Update pengguna failed");
 			}
 
-			return back()->with('update-petugas-failed', 'Petugas gagal diperbarui');
-		}
+			if (!$petugas->update(array_intersect_key($data, ['nama' => 'nama']))) {
+				throw new Exception("Update petugas failed");
+			}
 
-		return back()->with('update-petugas-canceled', 'Petugas tidak diperbarui, karena data tidak ada yang berubah');
+			DB::commit();
+
+			return redirect(route('petugas.show', ['username' => $data['username']]))
+				->with(['update-petugas-success' => 'Petugas berhasil diperbarui']);
+		} catch (Exception $ex) {
+			DB::rollback();
+
+			return back()->with(['update-petugas-failed' => 'Petugas gagal diperbarui']);
+		}
 	}
 
 	public function delete(string $username)
 	{
-		if ((new Petugas)->deleteWhere(['username' => $username])) {
+		$petugas = (new Petugas)->getDetailWhere(compact('username'));
+
+		if ($petugas->delete()) {
 			return redirect(route('petugas'))->with('delete-petugas-success', "Petugas Berhasil dihapus");
 		}
 

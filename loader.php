@@ -57,6 +57,7 @@ $dirs = [
 			'Pengguna.php',
 			'Petugas.php',
 			'Siswa.php',
+			'Transaksi.php',
 		],
 		'controllers' => [
 			'AuthController.php',
@@ -65,6 +66,7 @@ $dirs = [
 			'PembayaranController.php',
 			'PetugasController.php',
 			'SiswaController.php',
+			'TransaksiController.php',
 		],
 		'view' => [
 			'layout' => [
