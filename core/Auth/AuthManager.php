@@ -20,9 +20,10 @@ class AuthManager
 		$this->session = Application::getSession();
 	}
 
-	public function attempt(array $credentials = [])
+	public function attempt(array $credentials)
 	{
 		$password = $credentials['password'];
+
 		unset($credentials['password']);
 
 		$pengguna = (new Pengguna())->whereFirst($credentials);
@@ -30,7 +31,7 @@ class AuthManager
 		if ($pengguna->exists() && password_verify($password, $pengguna->password)) {
 			$this->session->put([
 				"$this->sessionKey.user.id" => $pengguna->id,
-				"$this->sessionKey.user.role" => $pengguna->role,
+				"$this->sessionKey.user.role" => $pengguna->role instanceof Role ? $pengguna->role->value : $pengguna->role,
 			]);
 
 			return true;
@@ -61,21 +62,26 @@ class AuthManager
 		$id = $this->session->get("$this->sessionKey.user.id");
 		$role = $this->session->get("$this->sessionKey.user.role");
 
-		$pengguna = new Pengguna();
-		$pengguna->where(['id' => $id]);
+		$pengguna = (new Pengguna())->whereFirst(compact('id', 'role'));
 
+		return $pengguna->exists() ? $pengguna : null;
+	}
 
-		if ($role === Role::ADMIN->value || $role === Role::PETUGAS->value) {
-			$petugas = new Petugas();
+	public function getWhoUsePengguna()
+	{
+		$pengguna = $this->user();
 
-			if ($petugas->getByPenggunaId($id)->exists()) {
-				return $petugas;
+		if ($pengguna->role === Role::SISWA) {
+			$siswa = (new Siswa())->whereFirst(['pengguna_id' => $pengguna->id]);
+
+			if ($siswa->exists()) {
+				return $siswa;
 			}
 		} else {
-			$siswa = new Siswa();
+			$petugas = (new Petugas())->whereFirst(['pengguna_id' => $pengguna->id]);
 
-			if ($siswa->getByPenggunaId($id)->exists()) {
-				return $siswa;
+			if ($petugas->exists()) {
+				return $petugas;
 			}
 		}
 

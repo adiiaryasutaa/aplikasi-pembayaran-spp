@@ -11,7 +11,7 @@
 <?php endif ?>
 
 <?php if (session()->hasFlash('delete-kelas-failed')): ?>
-	<div class="alert alert-info" role="alert">
+	<div class="alert alert-danger" role="alert">
 		<?= session()->getFlash('delete-kelas-failed') ?>
 	</div>
 <?php endif ?>

@@ -13,9 +13,9 @@ Route::get('/', [DashboardController::class, 'index'])->setName('dashboard');
 
 Route::get('/petugas', [PetugasController::class, 'index'])->setName('petugas');
 Route::post('/petugas', [PetugasController::class, 'create'])->setName('petugas.create');
-Route::get('/petugas/{username}', [PetugasController::class, 'show'])->setName('petugas.show');
-Route::post('/petugas/{username}/update', [PetugasController::class, 'update'])->setName('petugas.update');
-Route::post('/petugas/{username}/delete', [PetugasController::class, 'delete'])->setName('petugas.delete');
+Route::get('/petugas/{id:\d+}', [PetugasController::class, 'show'])->setName('petugas.show');
+Route::post('/petugas/{id:\d+}/update', [PetugasController::class, 'update'])->setName('petugas.update');
+Route::post('/petugas/{id:\d+}/delete', [PetugasController::class, 'delete'])->setName('petugas.delete');
 
 Route::get('/kelas', [KelasController::class, 'index'])->setName('kelas');
 Route::post('/kelas', [KelasController::class, 'create'])->setName('kelas.create');

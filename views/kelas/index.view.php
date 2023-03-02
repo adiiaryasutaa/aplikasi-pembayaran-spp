@@ -5,13 +5,13 @@
 <?php endif ?>
 
 <?php if (session()->hasFlash('create-kelas-failed')): ?>
-	<div class="alert alert-success" role="alert">
+	<div class="alert alert-danger" role="alert">
 		<?= session()->getFlash('create-kelas-failed') ?>
 	</div>
 <?php endif ?>
 
 <?php if (session()->hasFlash('delete-kelas-success')): ?>
-	<div class="alert alert-info" role="alert">
+	<div class="alert alert-success" role="alert">
 		<?= session()->getFlash('delete-kelas-success') ?>
 	</div>
 <?php endif ?>

@@ -134,7 +134,18 @@ class Store
 
 	public function hasInput(string $key)
 	{
-		return $this->has("_input.$key");
+		return $this->has("_old.$key");
+	}
+
+	public function clearInputs()
+	{
+		foreach ($this->attributes as $key => $value) {
+			if (substr($key, 0, 5) === '_old.') {
+				unset($this->attributes[$key]);
+			}
+		}
+
+		return $this;
 	}
 
 	public function __get($name)

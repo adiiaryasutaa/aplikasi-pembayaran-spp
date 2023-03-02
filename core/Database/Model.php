@@ -23,9 +23,109 @@ abstract class Model
 		$this->attributes = $attributes;
 	}
 
+	public function where(array $columns): array
+	{
+		$value = array_values($columns);
+		$columns = array_keys($columns);
+
+		$bindings = QueryHelper::makeColumnBindings($columns);
+		$wheres = QueryHelper::makeWheres($bindings);
+
+		$query = sprintf(
+			"SELECT %s FROM %s WHERE %s",
+			'*', $this->table,
+			$wheres,
+		);
+
+		$result = $this->connection->resultAll($query, array_combine($bindings, $value));
+
+		$this->queried();
+
+		return is_array($models = $this->make($result)) ? $models : [$models];
+	}
+
+	public function whereFirst(array $columns)
+	{
+		$values = array_values($columns);
+		$columns = array_keys($columns);
+		$bindings = QueryHelper::makeColumnBindings($columns);
+		$wheres = QueryHelper::makeWheres($bindings);
+
+		$query = sprintf(
+			"SELECT %s FROM %s WHERE %s LIMIT 1",
+			'*', $this->table,
+			$wheres
+		);
+
+		$result = $this->connection->result($query, array_combine($bindings, $values));
+
+		$this->queried();
+
+		$this->setAttributes($result);
+
+		return $this;
+	}
+
+	public function insert(array $data)
+	{
+		$columns = array_keys($data);
+		$values = array_values($data);
+		$bindingNames = QueryHelper::makeColumnBindings($columns);
+
+		$query = sprintf(
+			"INSERT INTO %s (%s) VALUES (%s)",
+			"$this->table",
+			implode(', ', $columns),
+			implode(', ', $bindingNames)
+		);
+
+		return $this->connection->statement(
+			$query,
+			array_combine($bindingNames, $values)
+		);
+	}
+
+	public function update(array $data)
+	{
+		$columns = array_merge(array_keys($data), ['id']);
+		$values = array_merge(array_values($data), [$this->id]);
+
+		$bindings = QueryHelper::makeColumnBindings($columns);
+		$sets = QueryHelper::makeSet(array_diff_key($bindings, ['id' => 1]));
+		$wheres = QueryHelper::makeWheres(array_intersect_key($bindings, ['id' => 1]));
+
+		$query = sprintf(
+			"UPDATE %s SET %s WHERE %s",
+			$this->table,
+			$sets,
+			$wheres
+		);
+
+		return $this->connection->statement($query, array_combine($bindings, $values));
+	}
+
+	public function delete()
+	{
+		$values = [$this->id];
+		$bindings = QueryHelper::makeColumnBindings(['id']);
+		$wheres = QueryHelper::makeWheres($bindings);
+
+		$query = sprintf(
+			"DELETE FROM %s WHERE %s",
+			$this->table,
+			$wheres
+		);
+
+		return $this->connection->statement($query, array_combine($bindings, $values));
+	}
+
 	public static function make(array $attributes = [])
 	{
-		if (!is_array($attributes[0])) {
+		if (empty($attributes)) {
+			return [];
+		}
+
+		if (!is_array(reset($attributes))) {
 			return new static ($attributes);
 		}
 
@@ -34,7 +134,6 @@ abstract class Model
 		foreach ($attributes as $attr) {
 			$models[] = new static ($attr);
 		}
-
 
 		return $models;
 	}

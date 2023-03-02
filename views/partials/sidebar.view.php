@@ -26,7 +26,7 @@
 		Transaksi
 	</div>
 
-	<?php if (!auth()->user()->pengguna->isSiswa()): ?>
+	<?php if (!auth()->user()->isSiswa()): ?>
 		<li class="nav-item <?= routeIs('transaksi') ? 'active' : '' ?>">
 			<a class="nav-link" href="<?= route('transaksi') ?>">
 				<i class="fas fa-fw fa-moon"></i>
@@ -34,7 +34,7 @@
 		</li>
 	<?php endif; ?>
 
-	<?php if (auth()->user()->pengguna->isAdmin()): ?>
+	<?php if (auth()->user()->isAdmin()): ?>
 		<li class="nav-item <?= routeIs('pembayaran') ? 'active' : '' ?>">
 			<a class="nav-link" href="<?= route('pembayaran') ?>">
 				<i class="fas fa-fw fa-sink"></i>
@@ -48,7 +48,7 @@
 			<span>Riwayat</span></a>
 	</li>
 
-	<?php if (auth()->user()->pengguna->isAdmin()): ?>
+	<?php if (auth()->user()->isAdmin()): ?>
 		<li class="nav-item">
 			<a class="nav-link" href="index.html">
 				<i class="fas fa-fw fa-file"></i>
@@ -56,7 +56,7 @@
 		</li>
 	<?php endif; ?>
 
-	<?php if (!auth()->user()->pengguna->isSiswa()): ?>
+	<?php if (!auth()->user()->isSiswa()): ?>
 		<!-- Divider -->
 		<hr class="sidebar-divider">
 
@@ -67,7 +67,7 @@
 
 	<?php endif; ?>
 
-	<?php if (auth()->user()->pengguna->isAdmin()): ?>
+	<?php if (auth()->user()->isAdmin()): ?>
 		<li class="nav-item <?= routeIs('siswa') ? 'active' : '' ?>">
 			<a class="nav-link" href="<?= route('siswa') ?>">
 				<i class="fas fa-fw fa-child"></i>
@@ -75,7 +75,7 @@
 		</li>
 	<?php endif; ?>
 
-	<?php if (!auth()->user()->pengguna->isSiswa()): ?>
+	<?php if (!auth()->user()->isSiswa()): ?>
 		<li class="nav-item <?= routeIs('kelas') ? 'active' : '' ?>">
 			<a class="nav-link" href="<?= route('kelas') ?>">
 				<i class="fas fa-fw fa-house-user"></i>
@@ -83,7 +83,7 @@
 		</li>
 	<?php endif; ?>
 
-	<?php if (auth()->user()->pengguna->isAdmin()): ?>
+	<?php if (auth()->user()->isAdmin()): ?>
 		<li class="nav-item  <?= routeIs('petugas') ? 'active' : '' ?>">
 			<a class="nav-link" href="<?= route('petugas') ?>">
 				<i class="fas fa-fw fa-user"></i>
@@ -91,7 +91,7 @@
 		</li>
 	<?php endif; ?>
 
-	<?php if (auth()->user()->pengguna->isAdmin()): ?>
+	<?php if (auth()->user()->isAdmin()): ?>
 		<!-- Divider -->
 		<hr class="sidebar-divider">
 

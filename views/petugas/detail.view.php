@@ -1,24 +1,18 @@
-<?php if (session()->hasFlash('delete-petugas-failed')): ?>
-	<div class="alert alert-danger" role="alert">
-		<?= session()->getFlash('delete-petugas-failed') ?>
-	</div>
-<?php endif ?>
-
 <?php if (session()->hasFlash('update-petugas-success')): ?>
 	<div class="alert alert-success" role="alert">
 		<?= session()->getFlash('update-petugas-success') ?>
 	</div>
 <?php endif ?>
 
-<?php if (session()->hasFlash('update-petugas-canceled')): ?>
-	<div class="alert alert-info" role="alert">
-		<?= session()->getFlash('update-petugas-canceled') ?>
-	</div>
-<?php endif ?>
-
 <?php if (session()->hasFlash('update-petugas-failed')): ?>
 	<div class="alert alert-danger" role="alert">
 		<?= session()->getFlash('update-petugas-failed') ?>
+	</div>
+<?php endif ?>
+
+<?php if (session()->hasFlash('delete-petugas-failed')): ?>
+	<div class="alert alert-danger" role="alert">
+		<?= session()->getFlash('delete-petugas-failed') ?>
 	</div>
 <?php endif ?>
 
@@ -48,7 +42,7 @@
 				Total transaksi
 			</div>
 			<div class="col-10">
-				: <?= $petugas->getTotalTransaksi() ?>
+				: <?= $petugas->total_transaksi ?>
 			</div>
 		</div>
 	</div>
@@ -79,7 +73,7 @@
 </div>
 
 <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="iushj" aria-hidden="true">
-	<form action="<?= route('petugas.update', ['username' => $petugas->pengguna->username]) ?>" method="post">
+	<form action="<?= route('petugas.update', ['id' => $petugas->id]) ?>" method="post">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -89,20 +83,47 @@
 					</button>
 				</div>
 				<div class="modal-body">
+					<div class="text-dark border-bottom mb-3">
+						Informasi Petugas
+					</div>
 					<div class="form-group mb-4">
-						<label for="name">Nama</label>
-						<input id="name" name="nama" type="text" class="text-dark form-control bg-light border border-primary small"
-							placeholder="<?= $petugas->nama ?>" value="<?= $petugas->nama ?>">
+						<label for="nama">Nama</label>
+						<input id="nama" name="nama" type="text" class="text-dark form-control bg-light border border-primary small"
+							placeholder="<?= $petugas->nama ?>" value="<?= old('nama', $petugas->nama) ?>">
+
+						<?php if (session()->hasError('nama')): ?>
+							<small class="form-text text-danger">
+								<?= error('nama') ?>
+							</small>
+						<?php endif; ?>
+
+					</div>
+					<div class="text-dark border-bottom mb-3">
+						Informasi Pengguna
 					</div>
 					<div class="form-group mb-4">
 						<label for="username">Username</label>
 						<input id="username" name="username" type="text" class="form-control bg-light border border-primary small"
-							placeholder="<?= $petugas->pengguna->username ?>" value="<?= $petugas->pengguna->username ?>">
+							placeholder="<?= $petugas->pengguna->username ?>"
+							value="<?= old('nama', $petugas->pengguna->username) ?>">
+
+						<?php if (session()->hasError('username')): ?>
+							<small class="form-text text-danger">
+								<?= error('username') ?>
+							</small>
+						<?php endif; ?>
+
 					</div>
 					<div class="form-group">
 						<label for="password">Password</label>
 						<input id="password" name="password" type="password"
 							class="form-control bg-light border border-primary small">
+
+						<?php if (session()->hasError('password')): ?>
+							<small class="form-text text-danger">
+								<?= error('password') ?>
+							</small>
+						<?php endif; ?>
 					</div>
 				</div>
 				<div class="modal-footer">
@@ -115,7 +136,7 @@
 </div>
 
 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="iushj" aria-hidden="true">
-	<form action="<?= route('petugas.delete', ['username' => $petugas->pengguna->username]) ?>" method="post">
+	<form action="<?= route('petugas.delete', ['id' => $petugas->id]) ?>" method="post">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -125,7 +146,8 @@
 					</button>
 				</div>
 				<div class="modal-body">
-					Apakah Anda yakin ingin menghapus <?= $petugas->nama ?>? Semua data transaksi yang dilakukannya akan berubah menjadi "Tidak diketahui"
+					Apakah Anda yakin ingin menghapus <?= $petugas->nama ?>? Semua data transaksi yang dilakukannya akan berubah
+					menjadi "Tidak diketahui"
 				</div>
 				<div class="modal-footer">
 					<button class="btn btn-secondary" type="reset" data-dismiss="modal">Batal</button>

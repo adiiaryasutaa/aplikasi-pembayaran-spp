@@ -21,14 +21,16 @@
 
 							<form action="<?= route('login') ?>" method="POST" class="user">
 								<div class="form-group">
-									<input name="username" type="text" class="form-control form-control-user" id="username"
-										placeholder="Username">
+									<input name="username" type="text"
+										class="form-control form-control-user border border-primary small rounded" id="username"
+										placeholder="Username" value="<?= old('username') ?>" >
 								</div>
 								<div class="form-group">
-									<input name="password" type="password" class="form-control form-control-user" id="password"
+									<input name="password" type="password"
+										class="form-control form-control-user border border-primary small rounded" id="password"
 										placeholder="Password">
 								</div>
-								<button type="submit" class="btn btn-primary btn-user btn-block">
+								<button type="submit" class="btn btn-primary btn-user btn-block rounded">
 									Login
 								</button>
 							</form>

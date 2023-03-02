@@ -3,7 +3,6 @@
 namespace Core\Routing;
 
 use Closure;
-use Core\Foundation\Application;
 use Core\Http\Request;
 use Core\Http\Response;
 use Core\Routing\Route;
@@ -105,7 +104,7 @@ class Router
 	{
 		$this->parseQueryString();
 
-		$method = $_SERVER['REQUEST_METHOD'];
+		$method = request()->method();
 		$uri = request()->uri();
 
 		$route = $this->getRoute($method, $uri);

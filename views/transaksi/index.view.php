@@ -44,14 +44,6 @@
 			<div class="card-body">
 				<div class="row">
 					<div class="col">
-						NISN
-					</div>
-					<div class="col-10">
-						: <?= $siswa->nisn ?>
-					</div>
-				</div>
-				<div class="row mt-4">
-					<div class="col">
 						NIS
 					</div>
 					<div class="col-10">
@@ -68,18 +60,18 @@
 				</div>
 				<div class="row mt-4">
 					<div class="col">
-						Alamat
+						Tahun ajaran
 					</div>
 					<div class="col-10">
-						: <?= $siswa->alamat ?>
+						: <?= $siswa->pembayaran->tahun_ajaran ?>
 					</div>
 				</div>
 				<div class="row mt-4">
 					<div class="col">
-						Nomor telepon
+						Nominal
 					</div>
 					<div class="col-10">
-						: <?= $siswa->telepon ?>
+						: <?="Rp " . number_format($siswa->pembayaran->nominal, 2, ',', '.') ?>
 					</div>
 				</div>
 			</div>
@@ -89,115 +81,101 @@
 		[$tahun1, $tahun2] = explode('/', $siswa->pembayaran->tahun_ajaran);
 		?>
 
+		<?php if (session()->hasFlash('transaksi-success')): ?>
+			<div class="alert alert-success" role="alert">
+				<?= session()->getFlash('transaksi-success') ?>
+			</div>
+		<?php endif ?>
+
+		<?php if (session()->hasFlash('transaksi-failed')): ?>
+			<div class="alert alert-danger" role="alert">
+				<?= session()->getFlash('transaksi-failed') ?>
+			</div>
+		<?php endif ?>
+
 		<div class="card mb-4">
 			<div class="card-header d-flex justify-content-between align-items-center py-3">
 				<h5 class="m-0 font-weight-bold text-primary">Transaksi</h5>
 			</div>
 			<div class="card-body">
 				<div class="row">
-					<div class="col-2">
-						<div class="card">
-							<div class="card-body">
-								<form action="<?= route('transaksi.pay', ['id' => $siswa->id]) ?>" method="post">
-									<input type="hidden" name="month" value="7">
-									<input type="hidden" name="year" value="<?= $tahun1 ?>">
+
+					<?php for ($i = 7; $i <= 12; $i++): ?>
+						<div class="col-2">
+							<div class="card">
+								<div class="card-body">
 									<div class="d-flex flex-column align-items-center">
 										<div class="d-flex flex-column align-items-center mb-2">
-											<div class="text-primary font-weight-bold h4">Juli</div>
+											<div class="text-primary font-weight-bold h4">
+												<?= match ($i) {
+													7 => 'Juli',
+													8 => 'Agustus',
+													9 => 'September',
+													10 => 'Oktober',
+													11 => 'November',
+													12 => 'Desember',
+												} ?>
+											</div>
 											<div class=" h6"><?= $tahun1 ?></div>
 										</div>
-										<button class="btn btn-primary" type="submit">Bayar</button>
+
+										<?php if (in_array($i, $paidOffMonths)): ?>
+											<button class="btn btn-primary" type="submit" disabled>Lunas</button>
+										<?php else: ?>
+											<form action="<?= route('transaksi.pay', ['id' => $siswa->id]) ?>" method="post">
+												<input type="hidden" name="month" value="<?= $i ?>">
+												<input type="hidden" name="year" value="<?= $tahun1 ?>">
+												<button class="btn btn-primary" type="submit">Bayar</button>
+											</form>
+										<?php endif ?>
+
 									</div>
-								</form>
+								</div>
 							</div>
 						</div>
-					</div>
-					<div class="col-2">
-						<div class="card">
-							<div class="card-body">
-								<form action="<?= route('transaksi.pay', ['id' => $siswa->id]) ?>" method="post">
-									<input type="hidden" name="month" value="8">
-									<input type="hidden" name="year" value="<?= $tahun1 ?>">
-									<div class="d-flex flex-column align-items-center">
-										<div class="d-flex flex-column align-items-center mb-2">
-											<div class="text-primary font-weight-bold h4">Agustus</div>
-											<div class=" h6"><?= $tahun1 ?></div>
-										</div>
-										<button class="btn btn-primary" type="submit">Bayar</button>
-									</div>
-								</form>
-							</div>
-						</div>
-					</div>
-					<div class="col-2">
-						<div class="card">
-							<div class="card-body">
-								<form action="<?= route('transaksi.pay', ['id' => $siswa->id]) ?>" method="post">
-									<input type="hidden" name="month" value="9">
-									<input type="hidden" name="year" value="<?= $tahun1 ?>">
-									<div class="d-flex flex-column align-items-center">
-										<div class="d-flex flex-column align-items-center mb-2">
-											<div class="text-primary font-weight-bold h4">September</div>
-											<div class=" h6"><?= $tahun1 ?></div>
-										</div>
-										<button class="btn btn-primary" type="submit">Bayar</button>
-									</div>
-								</form>
-							</div>
-						</div>
-					</div>
-					<div class="col-2">
-						<div class="card">
-							<div class="card-body">
-								<form action="<?= route('transaksi.pay', ['id' => $siswa->id]) ?>" method="post">
-									<input type="hidden" name="month" value="10">
-									<input type="hidden" name="year" value="<?= $tahun1 ?>">
-									<div class="d-flex flex-column align-items-center">
-										<div class="d-flex flex-column align-items-center mb-2">
-											<div class="text-primary font-weight-bold h4">Oktober</div>
-											<div class=" h6"><?= $tahun1 ?></div>
-										</div>
-										<button class="btn btn-primary" type="submit">Bayar</button>
-									</div>
-								</form>
-							</div>
-						</div>
-					</div>
-					<div class="col-2">
-						<div class="card">
-							<div class="card-body">
-								<form action="<?= route('transaksi.pay', ['id' => $siswa->id]) ?>" method="post">
-									<input type="hidden" name="month" value="11">
-									<input type="hidden" name="year" value="<?= $tahun1 ?>">
-									<div class="d-flex flex-column align-items-center">
-										<div class="d-flex flex-column align-items-center mb-2">
-											<div class="text-primary font-weight-bold h4">November</div>
-											<div class=" h6"><?= $tahun1 ?></div>
-										</div>
-										<button class="btn btn-primary" type="submit">Bayar</button>
-									</div>
-								</form>
-							</div>
-						</div>
-					</div>
-					<div class="col-2">
-						<div class="card">
-							<div class="card-body">
-								<form action="<?= route('transaksi.pay', ['id' => $siswa->id]) ?>" method="post">
-									<input type="hidden" name="month" value="12">
-									<input type="hidden" name="year" value="<?= $tahun1 ?>">
-									<div class="d-flex flex-column align-items-center">
-										<div class="d-flex flex-column align-items-center mb-2">
-											<div class="text-primary font-weight-bold h4">Desember</div>
-											<div class=" h6"><?= $tahun1 ?></div>
-										</div>
-										<button class="btn btn-primary" type="submit">Bayar</button>
-									</div>
-								</form>
-							</div>
-						</div>
-					</div>
+					<?php endfor; ?>
+
 				</div>
+
+				<div class="row mt-4">
+
+					<?php for ($i = 1; $i <= 6; $i++): ?>
+						<div class="col-2">
+							<div class="card">
+								<div class="card-body">
+									<div class="d-flex flex-column align-items-center">
+										<div class="d-flex flex-column align-items-center mb-2">
+											<div class="text-primary font-weight-bold h4">
+												<?= match ($i) {
+													1 => 'Januari',
+													2 => 'Februari',
+													3 => 'Maret',
+													4 => 'April',
+													5 => 'Mei',
+													6 => 'Juni',
+												} ?>
+											</div>
+											<div class=" h6"><?= $tahun2 ?></div>
+										</div>
+
+										<?php if (in_array($i, $paidOffMonths)): ?>
+											<button class="btn btn-primary" type="submit" disabled>Lunas</button>
+										<?php else: ?>
+											<form action="<?= route('transaksi.pay', ['id' => $siswa->id]) ?>" method="post">
+												<input type="hidden" name="month" value="<?= $i ?>">
+												<input type="hidden" name="year" value="<?= $tahun2 ?>">
+												<button class="btn btn-primary" type="submit">Bayar</button>
+											</form>
+										<?php endif ?>
+
+									</div>
+								</div>
+							</div>
+						</div>
+					<?php endfor; ?>
+
+				</div>
+
 			</div>
 		</div>
 	<?php endif; ?>

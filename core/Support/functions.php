@@ -121,7 +121,7 @@ function old(string $key, $default = null)
 function dd(...$vars)
 {
 	echo "<pre>";
-	print_r(...$vars);
+	var_dump(...$vars);
 	echo "</pre>";
 	exit();
 }

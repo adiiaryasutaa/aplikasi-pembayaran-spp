@@ -16,7 +16,6 @@ class PetugasController extends Controller
 {
 	public function index()
 	{
-		// Middleware
 		if (auth()->guest()) {
 			return redirect('login');
 		}
@@ -30,7 +29,6 @@ class PetugasController extends Controller
 
 	public function create()
 	{
-		// Middleware
 		if (auth()->guest()) {
 			return redirect('login');
 		}
@@ -47,8 +45,7 @@ class PetugasController extends Controller
 			return back()->withError($validator->getErrors());
 		}
 
-		$data = $validator->getValidated();
-		$data['role'] = Role::PETUGAS;
+		$data = array_merge($validator->getValidated(), ['role' => Role::PETUGAS]);
 
 		try {
 			DB::beginTransaction();
@@ -74,22 +71,17 @@ class PetugasController extends Controller
 		} catch (Exception $ex) {
 			DB::rollback();
 
-			dd($ex);
-
 			return back()->with('create-petugas-failed', 'Petugas gagal ditambahkan');
 		}
 	}
 
-	public function show(string $username)
+	public function show(int $id)
 	{
-		// Middleware
 		if (auth()->guest()) {
 			return redirect('login');
 		}
 
-		$petugas = (new Petugas())->getDetailWhere(
-			['pengguna.username' => $username, 'pengguna.role' => Role::PETUGAS->value]
-		);
+		$petugas = (new Petugas())->getDetailWhere(['petugas.id' => $id, 'pengguna.role' => Role::PETUGAS->value]);
 
 		return $petugas->exists() ? 
 				view('petugas/detail')
@@ -98,13 +90,15 @@ class PetugasController extends Controller
 			"404";
 	}
 
-	public function update(string $username)
+	public function update(int $id)
 	{
 		$inputs = $this->request()->only(['nama', 'username', 'password']);
 
+		$petugas = (new Petugas)->getDetailWhere(['pengguna.id' => $id]);
+
 		$validator = Validator::make($inputs, [
 			'nama' => [Rule::required(), Rule::max(50)],
-			'username' => [Rule::required(), Rule::max(25), Rule::unique('pengguna', 'username', $inputs['username'])],
+			'username' => [Rule::required(), Rule::max(25), Rule::unique('pengguna', 'username', $petugas->pengguna->username)],
 			'password' => [Rule::max(20)],
 		])->validate();
 
@@ -116,9 +110,9 @@ class PetugasController extends Controller
 
 		if (!strlen($data['password'])) {
 			unset($data['password']);
+		} else {
+			$data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
 		}
-
-		$petugas = (new Petugas)->getDetailWhere(['pengguna.username' => $username]);
 
 		try {
 			DB::beginTransaction();
@@ -133,8 +127,7 @@ class PetugasController extends Controller
 
 			DB::commit();
 
-			return redirect(route('petugas.show', ['username' => $data['username']]))
-				->with(['update-petugas-success' => 'Petugas berhasil diperbarui']);
+			return back()->with(['update-petugas-success' => 'Petugas berhasil diperbarui']);
 		} catch (Exception $ex) {
 			DB::rollback();
 
@@ -142,9 +135,9 @@ class PetugasController extends Controller
 		}
 	}
 
-	public function delete(string $username)
+	public function delete(int $id)
 	{
-		$petugas = (new Petugas)->getDetailWhere(compact('username'));
+		$petugas = (new Petugas)->whereFirst(compact('id'));
 
 		if ($petugas->delete()) {
 			return redirect(route('petugas'))->with('delete-petugas-success', "Petugas Berhasil dihapus");

@@ -37,8 +37,7 @@
 							<td><?= $p->nama ?></td>
 							<td><?= $p->pengguna->username ?></td>
 							<td>
-								<a href="<?= route('petugas.show', ['username' => $p->pengguna->username]) ?>"
-									class="btn btn-primary">Detail</a>
+								<a href="<?= route('petugas.show', ['id' => $p->id]) ?>" class="btn btn-primary">Detail</a>
 							</td>
 						</tr>
 					<?php endforeach; ?>
@@ -59,6 +58,9 @@
 					</button>
 				</div>
 				<div class="modal-body">
+					<div class="text-dark border-bottom mb-3">
+						Informasi Petugas
+					</div>
 					<div class="form-group mb-4">
 						<label for="nama">Nama</label>
 						<input id="nama" name="nama" type="text" class="form-control bg-light border border-primary small"
@@ -68,6 +70,9 @@
 							<small class="form-text text-danger"><?= error('nama') ?></small>
 						<?php endif; ?>
 
+					</div>
+					<div class="text-dark border-bottom mb-3">
+						Informasi Pengguna
 					</div>
 					<div class="form-group mb-4">
 						<label for="username">Username</label>

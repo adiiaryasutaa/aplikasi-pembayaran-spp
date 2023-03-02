@@ -11,7 +11,7 @@ class Rule
 		return [
 			'name' => 'required',
 			'error' => '%s dibutuhkan',
-			'action' => fn($data) => strlen(trim($data)),
+			'action' => fn($data) => is_int($data) ? $data > 0 : strlen(trim($data)),
 		];
 	}
 
@@ -75,7 +75,18 @@ class Rule
 		return [
 			'name' => 'exists',
 			'error' => "Data ini belum terdaftar",
-			'action' => !static::unique($table, $column)
+			'action' => function ($data) use ($table, $column) {
+				$query = sprintf(
+					"SELECT %s FROM %s WHERE %s",
+					$column,
+					$table,
+					"$column = :$column",
+				);
+
+				$result = DB::result($query, [$column => $data]);
+
+				return !empty($result);
+			}
 		];
 	}
 

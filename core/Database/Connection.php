@@ -60,7 +60,7 @@ class Connection
 
 		$statement->execute();
 
-		return $statement->fetch();
+		return ($result = $statement->fetch()) ? $result : [];
 	}
 
 	public function resultAll(string $query, array $bindings = [])
