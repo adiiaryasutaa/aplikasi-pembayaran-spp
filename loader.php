@@ -62,6 +62,7 @@ $dirs = [
 		'controllers' => [
 			'AuthController.php',
 			'DashboardController.php',
+			'HistoryController.php',
 			'KelasController.php',
 			'PembayaranController.php',
 			'PetugasController.php',

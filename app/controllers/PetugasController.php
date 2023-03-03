@@ -94,7 +94,7 @@ class PetugasController extends Controller
 	{
 		$inputs = $this->request()->only(['nama', 'username', 'password']);
 
-		$petugas = (new Petugas)->getDetailWhere(['pengguna.id' => $id]);
+		$petugas = (new Petugas)->withPenggunaWhereFirst(['petugas.id' => $id]);
 
 		$validator = Validator::make($inputs, [
 			'nama' => [Rule::required(), Rule::max(50)],

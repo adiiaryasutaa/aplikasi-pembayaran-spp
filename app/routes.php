@@ -2,6 +2,7 @@
 
 use App\Controller\AuthController;
 use App\Controller\DashboardController;
+use App\Controller\HistoryController;
 use App\Controller\KelasController;
 use App\Controller\PembayaranController;
 use App\Controller\PetugasController;
@@ -36,8 +37,9 @@ Route::post('/pembayaran/{id:\d+}/update', [PembayaranController::class, 'update
 Route::post('/pembayaran/{id:\d+}/delete', [PembayaranController::class, 'delete'])->setName('pembayaran.delete');
 
 Route::get('/transaksi', [TransaksiController::class, 'index'])->setName('transaksi');
-
 Route::post('/siswa/{id:\d+}/bayar', [TransaksiController::class, 'pay'])->setName('transaksi.pay');
+
+Route::get('/history', [HistoryController::class, 'index'])->setName('history');
 
 Route::get('/login', [AuthController::class, 'index'])->setName('login');
 Route::post('/login', [AuthController::class, 'authenticate'])->setName('authentication');

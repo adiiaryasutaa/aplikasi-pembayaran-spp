@@ -42,10 +42,10 @@
 		</li>
 	<?php endif; ?>
 
-	<li class="nav-item">
-		<a class="nav-link" href="index.html">
+	<li class="nav-item <?= routeIs('history') ? 'active' : '' ?>">
+		<a class="nav-link" href="<?= route('history') ?>">
 			<i class="fas fa-fw fa-history"></i>
-			<span>Riwayat</span></a>
+			<span>History</span></a>
 	</li>
 
 	<?php if (auth()->user()->isAdmin()): ?>

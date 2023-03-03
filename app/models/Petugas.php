@@ -81,4 +81,34 @@ class Petugas extends Model
 
 		return $this;
 	}
+
+	public function withPenggunaWhereFirst(array $columns)
+	{
+		$values = array_values($columns);
+		$columns = array_keys($columns);
+		$bindings = QueryHelper::makeColumnBindings($columns);
+		$wheres = QueryHelper::makeWheres($bindings);
+
+		$query = sprintf(
+			"SELECT %s FROM %s INNER JOIN %s ON %s WHERE %s",
+			'petugas.*, username, role', 'petugas', 'pengguna', 'petugas.pengguna_id = pengguna.id', $wheres
+		);
+
+		$result = $this->connection->result($query, array_combine($bindings, $values));
+
+		$this->queried();
+
+		if (!empty($result)) {
+			$this->setAttributes([
+				'id' => $result['id'],
+				'nama' => $result['nama'],
+				'pengguna' => new Pengguna([
+					'id' => $result['pengguna_id'],
+					'username' => $result['username'],
+					'role' => $result['role'],
+				]),
+			]);
+		}
+		return $this;
+	}
 }

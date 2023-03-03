@@ -96,49 +96,48 @@ class Siswa extends Model
 
 	public function getAllCurrentTraksaksi()
 	{
-		$columns = ['transaksi.siswa_id', 'transaksi.pembayaran_id'];
-		$values = [$this->id, $this->pembayaran_id];
+		$columns = ['siswa.id'];
+		$values = [$this->id];
 		$bindings = QueryHelper::makeColumnBindings($columns);
 		$wheres = QueryHelper::makeWheres($bindings);
 
 		$query = sprintf(
-			"SELECT %s FROM %s RIGHT JOIN %s ON %s INNER JOIN %s ON %s WHERE %s",
-			'siswa.id, nis, nama, siswa.pembayaran_id, tahun_ajaran, nominal, transaksi.id AS transaksiId, bulan_dibayar, tahun_dibayar',
-			'siswa',
-			'pembayaran',
-			'siswa.pembayaran_id = pembayaran.id',
-			'transaksi',
-			'siswa.id = transaksi.siswa_id',
-			$wheres
+			"SELECT %s FROM %s INNER JOIN %s ON %s WHERE %s",
+			'siswa.id, nis, nama, pembayaran_id, tahun_ajaran, nominal', 'siswa', 'pembayaran', 'siswa.pembayaran_id = pembayaran.id', $wheres
+		);
+
+		$result = $this->connection->result($query, array_combine($bindings, $values));
+
+		$this->queried();
+
+		$this->setAttributes([
+			...array_diff_key($result, ['pembayaran_id' => 1, 'nominal' => 1, 'tahun_ajaran' => 1]),
+			'pembayaran' => new Pembayaran([
+				'id' => $result['pembayaran_id'],
+				'tahun_ajaran' => $result['tahun_ajaran'],
+				'nominal' => $result['nominal'],
+			]),
+		]);
+
+		$columns = array_merge($columns, ['transaksi.pembayaran_id']);
+		$values = array_merge($values, [$this->pembayaran->id]);
+		$bindings = QueryHelper::makeColumnBindings($columns);
+		$wheres = QueryHelper::makeWheres($bindings);
+
+		$query = sprintf(
+			"SELECT %s FROM %s INNER JOIN %s ON %s WHERE %s",
+			'transaksi.id, bulan_dibayar, tahun_dibayar', 'transaksi', 'siswa', 'siswa.id = transaksi.siswa_id', $wheres
 		);
 
 		$result = $this->connection->resultAll($query, array_combine($bindings, $values));
 
-		$this->queried();
-
 		$transaksi = [];
 
-		foreach ($result as $r) {
-			$transaksi[] = new Transaksi([
-				'id' => $r['transaksiId'],
-				'bulan_dibayar' => $r['bulan_dibayar'],
-				'tahun_dibayar' => $r['tahun_dibayar'],
-			]);
+		foreach ($result as $t) {
+			$transaksi[] = new Transaksi($t);
 		}
 
-		$data = $result[0];
-
-		$this->setAttributes([
-			'id' => $data['id'],
-			'nis' => $data['nis'],
-			'nama' => $data['nama'],
-			'pembayaran' => new Pembayaran([
-				'id' => $data['pembayaran_id'],
-				'tahun_ajaran' => $data['tahun_ajaran'],
-				'nominal' => $data['nominal'],
-			]),
-			'transaksi' => $transaksi,
-		]);
+		$this->setAttribute('transaksi', $transaksi);
 
 		return $this;
 	}
@@ -201,6 +200,43 @@ class Siswa extends Model
 
 			$this->setAttribute('transaksi', $transaksi);
 		}
+
+		return $this;
+	}
+
+	public function getTransaksiHistories()
+	{
+		$columns = ['transaksi.siswa_id'];
+		$values = [$this->id];
+		$bindings = QueryHelper::makeColumnBindings($columns);
+		$wheres = QueryHelper::makeWheres($bindings);
+
+		$query = sprintf(
+			"SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s INNER JOIN %s ON %s WHERE %s",
+			'tanggal_dibayar, bulan_dibayar, tahun_dibayar, tahun_ajaran, petugas.nama', 'siswa', 'transaksi', 'siswa.id = transaksi.siswa_id', 'pembayaran', 'transaksi.pembayaran_id = pembayaran.id', 'petugas', 'transaksi.petugas_id = petugas.id', $wheres
+		);
+
+		$result = $this->connection->resultAll($query, array_combine($bindings, $values));
+
+		$transaksi = [];
+
+		if (!empty($result)) {
+			foreach ($result as $r) {
+				$transaksi[] = new Transaksi([
+					'tanggal_dibayar' => $r['tanggal_dibayar'],
+					'bulan_dibayar' => $r['bulan_dibayar'],
+					'tahun_dibayar' => $r['tahun_dibayar'],
+					'pembayaran' => new Pembayaran([
+						'tahun_ajaran' => $r['tahun_ajaran'],
+					]),
+					'petugas' => new Petugas([
+						'nama' => $r['nama'],
+					])
+				]);
+			}
+		}
+
+		$this->setAttribute('transaksi', $transaksi);
 
 		return $this;
 	}
