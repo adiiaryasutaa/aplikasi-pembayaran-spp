@@ -203,41 +203,4 @@ class Siswa extends Model
 
 		return $this;
 	}
-
-	public function getTransaksiHistories()
-	{
-		$columns = ['transaksi.siswa_id'];
-		$values = [$this->id];
-		$bindings = QueryHelper::makeColumnBindings($columns);
-		$wheres = QueryHelper::makeWheres($bindings);
-
-		$query = sprintf(
-			"SELECT %s FROM %s INNER JOIN %s ON %s INNER JOIN %s ON %s INNER JOIN %s ON %s WHERE %s",
-			'tanggal_dibayar, bulan_dibayar, tahun_dibayar, tahun_ajaran, petugas.nama', 'siswa', 'transaksi', 'siswa.id = transaksi.siswa_id', 'pembayaran', 'transaksi.pembayaran_id = pembayaran.id', 'petugas', 'transaksi.petugas_id = petugas.id', $wheres
-		);
-
-		$result = $this->connection->resultAll($query, array_combine($bindings, $values));
-
-		$transaksi = [];
-
-		if (!empty($result)) {
-			foreach ($result as $r) {
-				$transaksi[] = new Transaksi([
-					'tanggal_dibayar' => $r['tanggal_dibayar'],
-					'bulan_dibayar' => $r['bulan_dibayar'],
-					'tahun_dibayar' => $r['tahun_dibayar'],
-					'pembayaran' => new Pembayaran([
-						'tahun_ajaran' => $r['tahun_ajaran'],
-					]),
-					'petugas' => new Petugas([
-						'nama' => $r['nama'],
-					])
-				]);
-			}
-		}
-
-		$this->setAttribute('transaksi', $transaksi);
-
-		return $this;
-	}
 }

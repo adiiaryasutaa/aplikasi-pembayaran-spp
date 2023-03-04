@@ -12,17 +12,14 @@ class HistoryController extends Controller
 	public function index()
 	{
 		if (($user = auth()->user())->isSiswa()) {
-			$histories = (new Siswa)
-				->getDetailWhereFirst(['pengguna.id' => $user->id])
-				->getTransaksiHistories();
+			$siswa = (new Siswa)->getDetailWhereFirst(['pengguna.id' => $user->id]);
+			$histories = (new Transaksi)->forHistoryWhere(['transaksi.siswa_id' => $siswa->id]);
 		} else {
 			$histories = (new Transaksi)->allForHistory();
 		}
 
-		dd($histories);
-
 		return view('history/index')
-			->with(compact('histories'))
+			->with(compact('histories', 'user'))
 			->useLayout(new Dashboard);
 	}
 }
