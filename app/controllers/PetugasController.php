@@ -42,7 +42,9 @@ class PetugasController extends Controller
 		])->validate();
 
 		if ($validator->error()) {
-			return back()->withError($validator->getErrors());
+			return back()
+				->with(['open-modal' => 1])
+				->withError($validator->getErrors());
 		}
 
 		$data = array_merge($validator->getValidated(), ['role' => Role::PETUGAS]);
@@ -83,7 +85,7 @@ class PetugasController extends Controller
 
 		$petugas = (new Petugas())->getDetailWhere(['petugas.id' => $id, 'pengguna.role' => Role::PETUGAS->value]);
 
-		return $petugas->exists() ? 
+		return $petugas->exists() ?
 				view('petugas/detail')
 				->with(compact('petugas'))
 				->useLayout(new Dashboard()) :
@@ -103,7 +105,9 @@ class PetugasController extends Controller
 		])->validate();
 
 		if ($validator->error()) {
-			return back()->withError($validator->getErrors());
+			return back()
+				->with(['open-modal' => 1])
+				->withError($validator->getErrors());
 		}
 
 		$data = $validator->getValidated();

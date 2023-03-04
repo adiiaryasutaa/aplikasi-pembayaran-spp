@@ -54,7 +54,9 @@ class SiswaController extends Controller
 		])->validate();
 
 		if ($validator->error()) {
-			return back()->withError($validator->getErrors());
+			return back()
+				->with(['open-modal' => 1])
+				->withError($validator->getErrors());
 		}
 
 		$validated = $validator->getValidated();
@@ -135,7 +137,9 @@ class SiswaController extends Controller
 		])->validate();
 
 		if ($validator->error()) {
-			return back()->withError($validator->getErrors());
+			return back()
+				->with(['open-modal' => 1])
+				->withError($validator->getErrors());
 		}
 
 		$data = $validator->getValidated();

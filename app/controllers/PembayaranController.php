@@ -36,7 +36,9 @@ class PembayaranController extends Controller
 		$validator = Validator::make($inputs, $rules)->validate();
 
 		if ($validator->error()) {
-			return back()->withError($validator->getErrors());
+			return back()
+				->with(['open-modal' => 1])
+				->withError($validator->getErrors());
 		}
 
 		$data = $validator->getValidated();
@@ -44,7 +46,7 @@ class PembayaranController extends Controller
 
 		unset($data['tahun-ajaran-1'], $data['tahun-ajaran-2']);
 
-		return ((new Pembayaran)->insert($data)) ? 
+		return ((new Pembayaran)->insert($data)) ?
 			back()->with(['create-pembayaran-success' => 'Pembayaran berhasil dibuat']) :
 			back()->withError(['create-pembayaran-failed' => 'Pembayaran gagal dibuat']);
 	}
@@ -81,7 +83,9 @@ class PembayaranController extends Controller
 		$validator = Validator::make($inputs, $rules)->validate();
 
 		if ($validator->error()) {
-			return back()->withError($validator->getErrors());
+			return back()
+				->with(['open-modal' => 1])
+				->withError($validator->getErrors());
 		}
 
 		$pembayaran = (new Pembayaran)->getDetailWhereFirst(['pembayaran.id' => $id]);
@@ -92,7 +96,7 @@ class PembayaranController extends Controller
 
 		unset($data['tahun-ajaran-1'], $data['tahun-ajaran-2']);
 
-		return $pembayaran->update($data) ? 
+		return $pembayaran->update($data) ?
 			back()->with(['update-pembayaran-success' => 'Pembayaran berhasil diperbaharui']) :
 			back()->withError(['update-pembayaran-failed' => 'Pembayaran gagal diperbaharui']);
 	}
@@ -101,7 +105,7 @@ class PembayaranController extends Controller
 	{
 		$pembayaran = (new Pembayaran)->getDetailWhereFirst(['pembayaran.id' => $id]);
 
-		return $pembayaran->delete() ? 
+		return $pembayaran->delete() ?
 			redirect(route('pembayaran'))->with(['delete-pembayaran-success' => 'Pembayaran berhasil dihapus']) :
 			back()->withError(['delete-pembayaran-failed' => 'Pembayaran gagal dihapus']);
 	}

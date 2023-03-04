@@ -141,3 +141,13 @@
 		</div>
 	</form>
 </div>
+
+<?php if (session()->getFlash('open-modal')): ?>
+
+	<script type="text/javascript">
+		$(window).on('load', function () {
+			$('#editModal').modal('show')
+		})
+	</script>
+	
+<?php endif; ?>

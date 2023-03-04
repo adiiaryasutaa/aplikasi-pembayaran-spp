@@ -17,6 +17,8 @@
 	<!-- Custom styles for this template-->
 	<link href="<?= asset('css/sb-admin-2.min.css') ?>" rel="stylesheet">
 
+	<script src="<?= asset('vendor/jquery/jquery.min.js') ?>"></script>
+
 	<!-- Custom styles for this page -->
 	<link href="<?= asset('vendor/datatables/dataTables.bootstrap4.min.css') ?>" rel="stylesheet">
 </head>
@@ -56,7 +58,6 @@
 
 
 	<!-- Bootstrap core JavaScript-->
-	<script src="<?= asset('vendor/jquery/jquery.min.js') ?>"></script>
 	<script src="<?= asset('vendor/bootstrap/js/bootstrap.bundle.min.js') ?>"></script>
 
 	<!-- Core plugin JavaScript-->

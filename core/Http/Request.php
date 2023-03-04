@@ -15,7 +15,7 @@ class Request
 
 	public function saveInputsToSession()
 	{
-		//$this->session->clearInputs();
+		$this->session->clearInputs();
 
 		if ($this->method() === 'POST') {
 			$this->session->putInput($_POST);

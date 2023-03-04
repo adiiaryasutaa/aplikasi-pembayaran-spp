@@ -10,7 +10,12 @@
 					<div class="col-lg-6">
 						<div class="p-5">
 							<div class="text-center">
-								<h1 class="h4 text-gray-900 mb-4">Selamat Datang Kembali!</h1>
+								<h1 class="h4 text-gray-900 mb-4">
+									Selamat Datang di
+									<div class="text-primary font-weight-bold mt-2">
+										Aplikasi Pembayaran SPP
+									</div>
+								</h1>
 							</div>
 
 							<?php if (session()->hasFlash('login-failed')): ?>

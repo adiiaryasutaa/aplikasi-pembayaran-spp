@@ -49,15 +49,17 @@
 								<?php endif; ?>
 							</td>
 
-							<td>
-								<?php if ($user->isAdmin()): ?>
-									<a href="<?= route('siswa.show', ['id' => $transaksi->siswa->id]) ?>">
+							<?php if (!$user->isSiswa()): ?>
+								<td>
+									<?php if ($user->isAdmin()): ?>
+										<a href="<?= route('siswa.show', ['id' => $transaksi->siswa->id]) ?>">
+											<?= $transaksi->siswa->nis ?>
+										</a>
+									<?php else: ?>
 										<?= $transaksi->siswa->nis ?>
-									</a>
-								<?php else: ?>
-									<?= $transaksi->siswa->nis ?>
-								<?php endif; ?>
-							</td>
+									<?php endif; ?>
+								</td>
+							<?php endif; ?>
 
 							<td><?= $transaksi->petugas->nama ?></td>
 						</tr>

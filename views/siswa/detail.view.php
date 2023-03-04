@@ -138,7 +138,7 @@
 				Nominal
 			</div>
 			<div class="col-10">
-				: <?="Rp " . number_format($siswa->pembayaran->nominal, 2, ',', '.') ?>
+				: <?= "Rp " . number_format($siswa->pembayaran->nominal, 2, ',', '.') ?>
 			</div>
 		</div>
 	</div>
@@ -306,7 +306,7 @@
 											<?php foreach ($pembayaran as $p): ?>
 												<option value="<?= $p->id ?>" <?= old('pembayaran', $siswa->pembayaran->id) == $p->id ? 'selected' : '' ?>>
 													<span><?= $p->tahun_ajaran ?></span>
-													<span><?="Rp " . number_format($p->nominal, 2, ',', '.') ?></span>
+													<span><?= "Rp " . number_format($p->nominal, 2, ',', '.') ?></span>
 												</option>
 											<?php endforeach; ?>
 
@@ -342,7 +342,8 @@
 					</button>
 				</div>
 				<div class="modal-body">
-					Apakah Anda yakin ingin menghapus <?= $siswa->nama ?>? Semua data transaksi yang dilakukannya akan ikut terhapus
+					Apakah Anda yakin ingin menghapus <?= $siswa->nama ?>? Semua data transaksi yang dilakukannya akan ikut
+					terhapus
 				</div>
 				<div class="modal-footer">
 					<button class="btn btn-secondary" type="reset" data-dismiss="modal">Batal</button>
@@ -352,3 +353,13 @@
 		</div>
 	</form>
 </div>
+
+<?php if (session()->getFlash('open-modal')): ?>
+
+	<script type="text/javascript">
+			$(window).on('load', function () {
+				$('#editModal').modal('show')
+			})
+	</script>
+
+<?php endif; ?>

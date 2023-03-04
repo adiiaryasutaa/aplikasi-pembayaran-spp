@@ -47,7 +47,7 @@
 	</div>
 </div>
 
-<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="iushj" aria-hidden="true">
+<div id="addModal" class="modal fade" tabindex="-1" role="dialog">
 	<form action="<?= route('petugas.create') ?>" method="post">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
@@ -103,3 +103,14 @@
 		</div>
 	</form>
 </div>
+
+
+<?php if (session()->getFlash('open-modal')): ?>
+
+	<script type="text/javascript">
+		$(window).on('load', function () {
+			$('#addModal').modal('show')
+		})
+	</script>
+	
+<?php endif; ?>

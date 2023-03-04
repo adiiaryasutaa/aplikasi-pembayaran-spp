@@ -41,10 +41,12 @@ class KelasController extends Controller
 		])->validate();
 
 		if ($validator->error()) {
-			return back()->withError($validator->getErrors());
+			return back()
+				->with(['open-modal' => 1])
+				->withError($validator->getErrors());
 		}
 
-		return (new Kelas)->insert($validator->getValidated()) ? 
+		return (new Kelas)->insert($validator->getValidated()) ?
 			back()->with('create-kelas-success', 'Kelas berhasil ditambahkan') :
 			back()->with('create-kelas-failed', 'Kelas gagal ditambahkan');
 	}
@@ -64,10 +66,12 @@ class KelasController extends Controller
 		])->validate();
 
 		if ($validator->error()) {
-			return back()->withError($validator->getErrors());
+			return back()
+				->with(['open-modal' => 1])
+				->withError($validator->getErrors());
 		}
 
-		return $kelas->update($validator->getValidated()) ? 
+		return $kelas->update($validator->getValidated()) ?
 			back()->with('update-kelas-success', 'Kelas berhasil diperbarui') :
 			back()->with('update-kelas-failed', 'Kelas gagal diperbarui');
 	}
@@ -76,7 +80,7 @@ class KelasController extends Controller
 	{
 		$kelas = (new Kelas)->whereFirst(['kelas.id' => $id]);
 
-		return $kelas->delete() ? 
+		return $kelas->delete() ?
 			redirect(route('kelas'))->with('delete-kelas-success', 'Kelas berhasil dihapus') :
 			back()->with('delete-kelas-failed', 'Kelas gagal dihapus');
 	}
