@@ -22,9 +22,7 @@ class Dashboard extends Layout
 	 * The layout view data
 	 * @var array
 	 */
-	protected array $data = [
-		'title' => 'Dashboard',
-	];
+	protected array $data = [];
 
 	/**
 	 * The layout nested views
@@ -37,4 +35,11 @@ class Dashboard extends Layout
 		'{$ logout-modal $}' => 'partials/logout-modal',
 		'{$ sttb $}' => 'partials/scroll-to-top-button',
 	];
+
+	public function __construct(string $title = '')
+	{
+		$this->data['title'] = $title;
+
+		parent::__construct();
+	}
 }

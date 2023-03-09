@@ -20,7 +20,19 @@ abstract class Model
 	public function __construct(array $attributes = [])
 	{
 		$this->connection = Application::getDatabaseConnection();
-		$this->attributes = $attributes;
+		$this->setAttributes($attributes);
+	}
+
+	public function all()
+	{
+		$query = sprintf(
+			"SELECT %s FROM %s",
+			'*', $this->table
+		);
+
+		$result = $this->connection->resultAll($query);
+
+		return $this->make($result);
 	}
 
 	public function where(array $columns): array
@@ -126,13 +138,13 @@ abstract class Model
 		}
 
 		if (!is_array(reset($attributes))) {
-			return new static ($attributes);
+			return new static($attributes);
 		}
 
 		$models = [];
 
 		foreach ($attributes as $attr) {
-			$models[] = new static ($attr);
+			$models[] = new static($attr);
 		}
 
 		return $models;

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Model\Petugas;
 use App\Model\Siswa;
 use App\View\Layout\Dashboard;
 use Core\Http\Controller;
@@ -11,15 +12,22 @@ class HistoryController extends Controller
 {
 	public function index()
 	{
-		if (($user = auth()->user())->isSiswa()) {
-			$siswa = (new Siswa)->getDetailWhereFirst(['pengguna.id' => $user->id]);
-			$histories = (new Transaksi)->forHistoryWhere(['transaksi.siswa_id' => $siswa->id]);
+		$user = auth()->user();
+
+		$transaksi = new Transaksi;
+
+		if ($user->isAdmin()) {
+			$histories = $transaksi->allHistoryForAdmin();
+		} else if ($user->isPetugas()) {
+			$petugas = (new Petugas)->withPenggunaWhereFirst(['pengguna.id' => $user->id]);
+			$histories = $transaksi->allHistoryForPetugas(['transaksi.petugas_id' => $petugas->id]);
 		} else {
-			$histories = (new Transaksi)->allForHistory();
+			$siswa = (new Siswa)->getDetailWhereFirst(['pengguna.id' => $user->id]);
+			$histories = $transaksi->allHistoryForSiswa(['transaksi.siswa_id' => $siswa->id]);
 		}
 
 		return view('history/index')
 			->with(compact('histories', 'user'))
-			->useLayout(new Dashboard);
+			->useLayout(new Dashboard('History'));
 	}
 }

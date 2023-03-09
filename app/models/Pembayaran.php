@@ -9,18 +9,6 @@ class Pembayaran extends Model
 {
 	protected string $table = 'pembayaran';
 
-	public function all()
-	{
-		$query = sprintf(
-			"SELECT %s FROM %s",
-			'*', $this->table
-		);
-
-		$result = $this->connection->resultAll($query);
-
-		return $this->make($result);
-	}
-
 	public function getDetailWhereFirst(array $columns)
 	{
 		$values = array_values($columns);

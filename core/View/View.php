@@ -67,7 +67,7 @@ class View
 	/**
 	 * Add nested views
 	 * @param array|string $keys
-	 * @param string|View|null $value
+	 * @param string|View|null $view
 	 * @return View
 	 */
 	public function nest(array|string $keys, string|View|null $view = null)

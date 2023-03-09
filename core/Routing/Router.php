@@ -110,7 +110,7 @@ class Router
 		$route = $this->getRoute($method, $uri);
 
 		if (is_null($route)) {
-			return new Response("404 | Not Found", 404);
+			return notFound();
 		}
 
 		$action = $route->getAction();

@@ -40,6 +40,6 @@ class DashboardController extends Controller
 
 		return view('dashboard/index')
 			->with($data)
-			->useLayout(new Dashboard());
+			->useLayout(new Dashboard('Dashboard'));
 	}
 }

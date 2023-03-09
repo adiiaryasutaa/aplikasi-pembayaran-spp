@@ -30,7 +30,7 @@ class TransaksiController extends Controller
 
 		return view('transaksi/index')
 			->with($data)
-			->useLayout(new Dashboard);
+			->useLayout(new Dashboard('Transaksi'));
 	}
 
 	public function pay(int $id)
@@ -46,7 +46,7 @@ class TransaksiController extends Controller
 			'pembayaran_id' => $siswa->pembayaran_id,
 		];
 
-		return (new Transaksi)->insert($data) ? 
+		return (new Transaksi)->insert($data) ?
 			back()->with(['transaksi-success' => 'Proses transaksi sukses']) :
 			back()->with(['transaksi-failed' => 'Proses transaksi gagal']);
 	}

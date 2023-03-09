@@ -14,7 +14,7 @@ class AuthController extends Controller
 			return redirect('dashboard');
 		}
 
-		return view('auth/login')->useLayout(new Layout\Auth());
+		return view('auth/login')->useLayout(new Layout\Auth('Login'));
 	}
 
 	public function authenticate()

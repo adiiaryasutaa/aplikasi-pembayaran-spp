@@ -22,13 +22,18 @@ class Auth extends Layout
 	 * The layout view data
 	 * @var array
 	 */
-	protected array $data = [
-		'title' => 'Login',
-	];
+	protected array $data = [];
 
 	/**
 	 * The layout nested views
 	 * @var array
 	 */
 	protected array $nests = [];
+
+	public function __construct(string $title = '')
+	{
+		$this->data['title'] = $title;
+
+		parent::__construct();
+	}
 }

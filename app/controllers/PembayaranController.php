@@ -16,7 +16,7 @@ class PembayaranController extends Controller
 
 		return view('pembayaran/index')
 			->with(compact('pembayaran'))
-			->useLayout(new Dashboard);
+			->useLayout(new Dashboard('Pembayaran'));
 	}
 
 	public function create()

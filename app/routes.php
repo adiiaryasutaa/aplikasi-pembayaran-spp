@@ -4,7 +4,9 @@ use App\Controller\AuthController;
 use App\Controller\DashboardController;
 use App\Controller\HistoryController;
 use App\Controller\KelasController;
+use App\Controller\LaporanController;
 use App\Controller\PembayaranController;
+use App\Controller\PenggunaController;
 use App\Controller\PetugasController;
 use App\Controller\SiswaController;
 use App\Controller\TransaksiController;
@@ -40,6 +42,12 @@ Route::get('/transaksi', [TransaksiController::class, 'index'])->setName('transa
 Route::post('/siswa/{id:\d+}/bayar', [TransaksiController::class, 'pay'])->setName('transaksi.pay');
 
 Route::get('/history', [HistoryController::class, 'index'])->setName('history');
+
+Route::get('/pengguna', [PenggunaController::class, 'index'])->setName('pengguna');
+Route::get('/pengguna/{username:\w+}', [PenggunaController::class, 'show'])->setName('pengguna.show');
+
+Route::get('/laporan', [LaporanController::class, 'index'])->setName('laporan');
+Route::post('/laporan', [LaporanController::class, 'generate'])->setName('laporan.create');
 
 Route::get('/login', [AuthController::class, 'index'])->setName('login');
 Route::post('/login', [AuthController::class, 'authenticate'])->setName('authentication');

@@ -16,7 +16,9 @@
 							<th>NIS</th>
 						<?php endif; ?>
 
-						<th>Petugas</th>
+						<?php if (!$user->isPetugas()): ?>
+							<th>Petugas</th>
+						<?php endif; ?>
 					</tr>
 				</thead>
 				<tbody>
@@ -61,7 +63,17 @@
 								</td>
 							<?php endif; ?>
 
-							<td><?= $transaksi->petugas->nama ?></td>
+							<?php if (!$user->isPetugas()): ?>
+								<td>
+									<?php if ($user->isAdmin() && $transaksi->petugas->id !== auth()->user()->id): ?>
+										<a href="<?= route('petugas.show', ['id' => $transaksi->petugas->id]) ?>">
+											<?= $transaksi->petugas->nama ?>
+										</a>
+									<?php else: ?>
+										<?= $transaksi->petugas->nama ?>
+									<?php endif; ?>
+								</td>
+							<?php endif; ?>
 						</tr>
 					<?php endforeach; ?>
 				</tbody>

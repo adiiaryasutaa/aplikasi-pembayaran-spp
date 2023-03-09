@@ -64,7 +64,9 @@ $dirs = [
 			'DashboardController.php',
 			'HistoryController.php',
 			'KelasController.php',
+			'LaporanController.php',
 			'PembayaranController.php',
+			'PenggunaController.php',
 			'PetugasController.php',
 			'SiswaController.php',
 			'TransaksiController.php',
@@ -80,20 +82,20 @@ $dirs = [
 
 $includes = [];
 
-function b(string $basePath, array $dirs)
+function load(string $basePath, array $dirs)
 {
 	global $includes;
 
 	foreach ($dirs as $key => $value) {
 		if (is_string($key)) {
-			b($basePath . '/' . $key, $value);
+			load($basePath . '/' . $key, $value);
 		} else {
 			$includes[] = $basePath . '/' . $value;
 		}
 	}
 }
 
-b(__DIR__, $dirs);
+load(__DIR__, $dirs);
 
 foreach ($includes as $include) {
 	include_once($include);

@@ -24,7 +24,7 @@ class SiswaController extends Controller
 
 		return view('siswa/index')
 			->with(compact('siswa', 'kelas', 'pembayaran'))
-			->useLayout(new Dashboard);
+			->useLayout(new Dashboard('Siswa'));
 	}
 
 	public function create()
@@ -105,7 +105,7 @@ class SiswaController extends Controller
 
 		return view('siswa/detail')
 			->with(compact('siswa', 'kelas', 'pembayaran'))
-			->useLayout(new Dashboard);
+			->useLayout(new Dashboard("Siswa | $siswa->nama"));
 	}
 
 	public function update(int $id)

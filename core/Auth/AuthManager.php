@@ -87,4 +87,18 @@ class AuthManager
 
 		throw new Exception("User is authenticated but user doesn't exist");
 	}
+
+	public function getId()
+	{
+		return $this->session->get("$this->sessionKey.user.id");
+	}
+
+	public function getRole()
+	{
+		return match ($this->session->get("$this->sessionKey.user.role")) {
+			1 => Role::ADMIN,
+			2 => Role::PETUGAS,
+			3 => Role::SISWA,
+		};
+	}
 }

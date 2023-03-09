@@ -49,14 +49,13 @@ function route(string $name, array $parameters = [])
 
 function routeIs(string $name)
 {
-	$currentRoute = $_SERVER['REQUEST_URI'];
 	$route = Route::getRouteByName($name);
 
 	if (is_null($route)) {
 		return false;
 	}
 
-	return $route->getUri() === $currentRoute;
+	return $route->matches(request()->uri());
 }
 
 function redirect(string $to, int $status = 302)
@@ -116,6 +115,11 @@ function error(string $key)
 function old(string $key, $default = null)
 {
 	return session()->getInput($key) ?? $default;
+}
+
+function notFound()
+{
+	return redirect(route('dashboard'), 404);
 }
 
 function dd(...$vars)

@@ -24,7 +24,7 @@ class PetugasController extends Controller
 
 		return view('petugas/index')
 			->with(compact('petugas'))
-			->useLayout(new Dashboard());
+			->useLayout(new Dashboard('Petugas'));
 	}
 
 	public function create()
@@ -48,6 +48,7 @@ class PetugasController extends Controller
 		}
 
 		$data = array_merge($validator->getValidated(), ['role' => Role::PETUGAS]);
+		$data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
 
 		try {
 			DB::beginTransaction();
@@ -88,7 +89,7 @@ class PetugasController extends Controller
 		return $petugas->exists() ?
 				view('petugas/detail')
 				->with(compact('petugas'))
-				->useLayout(new Dashboard()) :
+				->useLayout(new Dashboard("Petugas | $petugas->nama")) :
 			"404";
 	}
 

@@ -91,6 +91,11 @@ class Request
 		return $this->queries()[$name] ?? null;
 	}
 
+	public function hasQuery(string $name)
+	{
+		return isset($this->queries()[$name]);
+	}
+
 	/**
 	 * Get string request input
 	 * @param string $name

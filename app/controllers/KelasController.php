@@ -16,7 +16,7 @@ class KelasController extends Controller
 
 		return view('kelas/index')
 			->with(compact('kelas'))
-			->useLayout(new Dashboard);
+			->useLayout(new Dashboard('Kelas'));
 	}
 
 	public function show(int $id)
@@ -25,7 +25,7 @@ class KelasController extends Controller
 
 		return view('kelas/detail')
 			->with(compact('kelas'))
-			->useLayout(new Dashboard);
+			->useLayout(new Dashboard("Kelas | $kelas->nama"));
 	}
 
 	public function create()

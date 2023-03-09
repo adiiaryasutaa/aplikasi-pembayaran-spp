@@ -35,7 +35,7 @@
 	<?php endif; ?>
 
 	<?php if (auth()->user()->isAdmin()): ?>
-		<li class="nav-item <?= routeIs('pembayaran') ? 'active' : '' ?>">
+		<li class="nav-item <?= routeIs('pembayaran') || routeIs('pembayaran.show') ? 'active' : '' ?>">
 			<a class="nav-link" href="<?= route('pembayaran') ?>">
 				<i class="fas fa-fw fa-sink"></i>
 				<span>Pembayaran</span></a>
@@ -49,8 +49,8 @@
 	</li>
 
 	<?php if (auth()->user()->isAdmin()): ?>
-		<li class="nav-item">
-			<a class="nav-link" href="index.html">
+		<li class="nav-item <?= routeIs('laporan') ? 'active' : '' ?>">
+			<a class="nav-link" href="<?= route('laporan') ?>">
 				<i class="fas fa-fw fa-file"></i>
 				<span>Laporan</span></a>
 		</li>
@@ -68,7 +68,7 @@
 	<?php endif; ?>
 
 	<?php if (auth()->user()->isAdmin()): ?>
-		<li class="nav-item <?= routeIs('siswa') ? 'active' : '' ?>">
+		<li class="nav-item <?= routeIs('siswa') || routeIs('siswa.show') ? 'active' : '' ?>">
 			<a class="nav-link" href="<?= route('siswa') ?>">
 				<i class="fas fa-fw fa-child"></i>
 				<span>Siswa</span></a>
@@ -76,7 +76,7 @@
 	<?php endif; ?>
 
 	<?php if (!auth()->user()->isSiswa()): ?>
-		<li class="nav-item <?= routeIs('kelas') ? 'active' : '' ?>">
+		<li class="nav-item <?= routeIs('kelas') || routeIs('kelas.show') ? 'active' : '' ?>">
 			<a class="nav-link" href="<?= route('kelas') ?>">
 				<i class="fas fa-fw fa-house-user"></i>
 				<span>Kelas</span></a>
@@ -84,7 +84,7 @@
 	<?php endif; ?>
 
 	<?php if (auth()->user()->isAdmin()): ?>
-		<li class="nav-item  <?= routeIs('petugas') ? 'active' : '' ?>">
+		<li class="nav-item  <?= routeIs('petugas') || routeIs('petugas.show') ? 'active' : '' ?>">
 			<a class="nav-link" href="<?= route('petugas') ?>">
 				<i class="fas fa-fw fa-user"></i>
 				<span>Petugas</span></a>
@@ -100,8 +100,8 @@
 			User
 		</div>
 
-		<li class="nav-item  ">
-			<a class="nav-link" href="index.html">
+		<li class="nav-item <?= routeIs('pengguna') || routeIs('pengguna.show') ? 'active' : '' ?>">
+			<a class="nav-link" href="<?= route('pengguna') ?>">
 				<i class="fas fa-fw fa-user"></i>
 				<span>Pengguna</span></a>
 		</li>
